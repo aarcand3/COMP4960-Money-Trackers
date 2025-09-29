@@ -1,5 +1,6 @@
 # Money Trackers - Team 1
 # Jack Donahue, Simon, Allison, Sonia
+import sys
 import csv
 import math
 loggedin = False
@@ -27,9 +28,17 @@ def updateUser():
     pass
 
 
+
+
 # PROGRAM START: Begining of user interaction
-userdata[0] = input("Welcome, please endter your user ID: ")
-importUser(userdata[0])
+while not loggedin:
+    userdata[0] = input("Welcome, please endter your user ID: ")
+    if userdata[0] == "quit":
+        sys.exit()
+    importUser(userdata[0])
+    if not loggedin:
+        print ("\nInvalid, Please try again or enter 'quit'")
+
 
 # Checks that the user id was found in the user-data.csv using the loggedin var and if so welcomes the user
 if loggedin:
@@ -38,17 +47,17 @@ if loggedin:
     
     # While the user is still loggedin loop operations untill they loggout
     while loggedin:
-        select = int(input("what would you like to do today?\n[0] Loggout & Close\n[1] Check Balence\n"))
-        if select == 0:
+        select = input("what would you like to do today?\n\n[quit] Loggout & Close\n[1] Check Balence\n\nPlease make your selection: ")
+        if select == "quit":
             loggedin = False
             break
         elif select == 1:
-            print("Your Balence is: "+ userdata[3])
+            print("\nYour Balence is: "+ userdata[3]+"\n")
         else:
-            print("Invalid try again")
+            print("\nInvalid try again\n")
 
-# if no user id was found the program closes with a message
 else:
-    print ("\nUser ID not found!")
+    print("error: esscaped loggin loop without loggedin var being True")
+    sys.exit()
     
 
