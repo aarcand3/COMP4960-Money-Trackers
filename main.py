@@ -25,7 +25,7 @@ def loggin():
             loggedin = True
         else:
             # Imports data from user-data.csv to the userdata list
-            with open("user-data.csv", mode="r") as data:
+            with open("data/userlist.csv", mode="r") as data:
                 csv_reader = csv.reader(data)
                 for row in csv_reader:
                     if row[0] == userdata[0]:
@@ -69,6 +69,7 @@ while not userQuit:
         userSession()
 
 print("[DEBUG] program end")
+
 
 
 
