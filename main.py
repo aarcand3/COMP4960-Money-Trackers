@@ -52,7 +52,7 @@ def userSession():
                 userQuit = True
                 loggedin = False
             elif select == "logout":
-                userdata[0] = "userid"
+                userdata = ["userid", "firstname", "lastname", 0]
                 loggedin = False
             elif select == "1":
                 print("\nYour Balence is: "+ userdata[3]+"\n")
