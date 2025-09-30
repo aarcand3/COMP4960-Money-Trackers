@@ -1,26 +1,12 @@
 # Money Trackers - Team 1
 # Jack Donahue, Simon, Allison, Sonia
-import sys
 import csv
 import math
+userQuit = False
 loggedin = False
-
-# Imports data from user-data.csv to the userdata list
 # [userid, firstname, lastname, balence]
 userdata = ["userid", "firstname", "lastname", 0]
-def importUser(userid):
-    global loggedin
-    global userdata
-    # read CSV and look for the userid they entered
-    with open("user-data.csv", mode="r") as data:
-        csv_reader = csv.reader(data)
-        for row in csv_reader:
-            if row[0] == userid:
-                userdata[1] = row[1]
-                userdata[2] = row[2]
-                userdata[3] = row[3]
-                loggedin = True
-                break
+
 
 # reads the userid-money file and updates thir user-data CSV entry
 def updateUser():
@@ -28,36 +14,81 @@ def updateUser():
     pass
 
 
-
-
-# PROGRAM START: Begining of user interaction
-while not loggedin:
-    userdata[0] = input("Welcome, please endter your user ID: ")
-    if userdata[0] == "quit":
-        sys.exit()
-    importUser(userdata[0])
-    if not loggedin:
-        print ("\nInvalid, Please try again or enter 'quit'")
+# While the user is not logged in, prompt for a valid userid
+def loggin():
+    global userQuit
+    global loggedin 
+    while not loggedin and not userQuit:
+        userdata[0] = input("\nWelcome, please enter your user ID: ")
+        if userdata[0] == "quit":
+            userQuit = True
+            loggedin = True
+        else:
+            # Imports data from user-data.csv to the userdata list
+            with open("user-data.csv", mode="r") as data:
+                csv_reader = csv.reader(data)
+                for row in csv_reader:
+                    if row[0] == userdata[0]:
+                        userdata[1] = row[1]
+                        userdata[2] = row[2]
+                        userdata[3] = row[3]
+                        loggedin = True
+                if not loggedin:
+                    print ("\nInvalid, Please try again or enter [quit]")
 
 
 # Checks that the user id was found in the user-data.csv using the loggedin var and if so welcomes the user
-if loggedin:
-    print ("\nWelcome " + userdata[1] + " " + userdata[2] + "!")
-    print ("[DEBUG] userdata: " + userdata[1], userdata[2], userdata[3])
+def userSession():
+    global userQuit
+    global loggedin
+    if loggedin:
+        print ("[DEBUG] userdata: " + userdata[1], userdata[2], userdata[3])
+        print ("\nWelcome " + userdata[1] + " " + userdata[2] + "!")
     
-    # While the user is still loggedin loop operations untill they loggout
-    while loggedin:
-        select = input("what would you like to do today?\n\n[quit] Loggout & Close\n[1] Check Balence\n\nPlease make your selection: ")
-        if select == "quit":
-            loggedin = False
-            break
-        elif select == 1:
-            print("\nYour Balence is: "+ userdata[3]+"\n")
-        else:
-            print("\nInvalid try again\n")
+        # While the user is still loggedin loop operations untill they logout
+        while loggedin:
+            select = input("what would you like to do today?\n\n[quit] Logout & Close\n[logout] Return to login page\n[1] Check Balence\n\nPlease make your selection: ")
+            if select == "quit":
+                userQuit = True
+                loggedin = False
+            elif select == "logout":
+                userdata[0] = "userid"
+                loggedin = False
+            elif select == "1":
+                print("\nYour Balence is: "+ userdata[3]+"\n")
+            else:
+                print("\nInvalid try again\n")
+    else:
+        print("[ERROR] Escaped login loop without loggedin == True")
 
-else:
-    print("error: esscaped loggin loop without loggedin var being True")
-    sys.exit()
-    
+
+# Main program loop
+while not userQuit:
+    loggin()
+    if loggedin and not userQuit:
+        userSession()
+
+print("[DEBUG] program end")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
