@@ -2,8 +2,6 @@
 # Jack Donahue, Simon, Allison, Sonia
 import csv
 import math
-
-
 userQuit = False
 loggedin = False
 # [userid, firstname, lastname, balence]
@@ -12,7 +10,7 @@ userdata = ["userid", "firstname", "lastname", 0]
 
 # reads the userid-money file and updates thir user-data CSV entry
 def updateUser():
-    #userid-money contains [index, date, cardtype, purchacetype, ammount] this format will change
+    #userid-money contains [index, date, cardtype, purchasetype, amount] this format will change
     pass
 
 
@@ -49,19 +47,20 @@ def userSession():
     
         # While the user is still loggedin loop operations untill they logout
         while loggedin:
-            select = input("what would you like to do today?\n\n[quit] Logout & Close\n[logout] Return to login page\n[1] Check Balence\n\nPlease make your selection: ")
+            select = input("what would you like to do today?\n\n[quit] Logout & Close\n[logout] Return to login page\n[1] Check Balance\n\nPlease make your selection: ")
             if select == "quit":
                 userQuit = True
                 loggedin = False
             elif select == "logout":
-                userdata = ["userid", "firstname", "lastname", 0]
+                userdata[0] = "userid"
                 loggedin = False
             elif select == "1":
-                print("your balance is: {userdata[3]}")
+                print("\nYour Balance is: "+ userdata[3]+"\n")
             else:
                 print("\nInvalid try again\n")
     else:
         print("[ERROR] Escaped login loop without loggedin == True")
+
 
 # Main program loop
 while not userQuit:
