@@ -2,6 +2,8 @@
 # Jack Donahue, Simon, Allison, Sonia
 import csv
 import math
+
+
 userQuit = False
 loggedin = False
 # [userid, firstname, lastname, balence]
@@ -55,12 +57,11 @@ def userSession():
                 userdata[0] = "userid"
                 loggedin = False
             elif select == "1":
-                print("\nYour Balence is: "+ userdata[3]+"\n")
+                print("your balance is: {userdata[3]}")
             else:
                 print("\nInvalid try again\n")
     else:
         print("[ERROR] Escaped login loop without loggedin == True")
-
 
 # Main program loop
 while not userQuit:
