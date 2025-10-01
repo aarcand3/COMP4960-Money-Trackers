@@ -2,14 +2,14 @@
 # Jack Donahue, Simon, Allison, Sonia
 import csv
 import math
-
+import pandas as pd
 
 from PyQt5.QtWidgets import *
 
 
 userQuit = False
 loggedin = False
-# [userid, firstname, lastname, balence]
+# [userid, firstname, lastname, balance]
 userdata = ["userid", "firstname", "lastname", 0]
 
 
@@ -29,7 +29,7 @@ def loggin():
             userQuit = True
             loggedin = True
         else:
-            # Imports data from user-data.csv to the userdata list
+            # Imports data from user-data.csv to the userdata list, then logs it
             with open("data/userlist.csv", mode="r") as data:
                 csv_reader = csv.reader(data)
                 for row in csv_reader:
@@ -38,8 +38,26 @@ def loggin():
                         userdata[2] = row[2]
                         userdata[3] = row[3]
                         loggedin = True
+
+                        log_entry = {
+                            "userid": userdata[0],
+                            "firstname": userdata[1],
+                            "lastname": userdata[2],
+                            "balance": userdata[3]
+                        }
+                        df = pd.DataFrame([log_entry])
+                        df.to_csv(
+                            "test.log",
+                            mode="a",
+                            index=False,
+                            header=not pd.io.common.file_exists("test.log")
+                        )
+
+                        
                 if not loggedin:
                     print ("\nInvalid, Please try again or enter [quit]")
+
+# Reads a potential csv file and logs it to test, using comma as a delimiter
 
 
 # Checks that the user id was found in the user-data.csv using the loggedin var and if so welcomes the user
