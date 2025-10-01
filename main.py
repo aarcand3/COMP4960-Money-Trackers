@@ -2,7 +2,7 @@
 # Jack Donahue, Simon, Allison, Sonia
 import csv
 import math
-
+from PyQt5.QtWidgets import *
 
 userQuit = False
 loggedin = False
@@ -43,6 +43,7 @@ def loggin():
 def userSession():
     global userQuit
     global loggedin
+    global userdata
     if loggedin:
         print ("[DEBUG] userdata: " + userdata[1], userdata[2], userdata[3])
         print ("\nWelcome " + userdata[1] + " " + userdata[2] + "!")
@@ -57,7 +58,7 @@ def userSession():
                 userdata = ["userid", "firstname", "lastname", 0]
                 loggedin = False
             elif select == "1":
-                print("your balance is: {userdata[3]}")
+                print("your balance is: "+ userdata[3])
             else:
                 print("\nInvalid try again\n")
     else:
@@ -65,6 +66,7 @@ def userSession():
 
 # Main program loop
 while not userQuit:
+
     loggin()
     if loggedin and not userQuit:
         userSession()
