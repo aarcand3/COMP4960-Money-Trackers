@@ -34,7 +34,8 @@ def loggin():
                         "balance": userdata[4]
                     }
                     df = pd.DataFrame([log_entry])
-                    df.to_csv(
+                    hashes = pd.util.hash_pandas_object(df)
+                    hashes.to_csv(
                         "test.log",
                         mode="a",
                         index=False,
