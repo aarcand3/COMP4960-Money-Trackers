@@ -8,8 +8,7 @@ from PyQt5.QtWidgets import *
 
 userQuit = False
 loggedin = False
-# [userid, firstname, lastname, balance]
-userdata = ["userid", "userpass","firstname", "lastname", 0]
+userdata = ["userid", "userpass","firstname", "lastname", "float-balence"]
 
 
 # While the user is not logged in, prompt for a valid userid
@@ -18,7 +17,7 @@ def loggin():
     global loggedin 
     while not loggedin and not userQuit:
         userdata[0] = input("\nWelcome, please enter your user ID: ")
-        userdata[1] = input("\nNow, please enter your password: ")
+        userdata[1] = input("Now, please enter your password: ")
         # Imports data from user-data.csv to the userdata list, then logs it
         with open("data/userlist.csv", mode="r") as data:
             csv_reader = csv.reader(data)
@@ -65,11 +64,17 @@ def loggin():
                         print("\nInvalid try again\n")
 
 
-# Main program loop
-while not userQuit:
-    loggin()
+# Main program calls
+loggin()
 
 print("[DEBUG] program end")
+
+
+
+
+
+
+
 
 
 
