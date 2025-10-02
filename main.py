@@ -40,7 +40,7 @@ while not loggedin and not userQuit:
                     header=not pd.io.common.file_exists("test.log")
                 )
             
-        # When there is a sucessful login this block of code begins a user session loop
+        # When there is a sucessful login this block of code begins the user session loop
         if loggedin:
             print ("[DEBUG] userdata: " + userdata[1], userdata[2], userdata[3])
             print ("\nWelcome " + userdata[1] + " " + userdata[2] + "!")
@@ -58,9 +58,9 @@ while not loggedin and not userQuit:
                     print("\nYour Balance is: "+ userdata[3]+"\n")
                     print("your balance is: "+ userdata[3])
                 else:
-                    print("\nInvalid try again\n")
+                    print("\nInvalid, try again\n")
         else:                
-            print ("\nInvalid, Please try again or enter")
+            print ("\nInvalid, try again")
 
 print("[DEBUG] program end")
 
