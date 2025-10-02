@@ -1,2 +1,2 @@
-userid,password,firstname,lastname,balence
-jdoe,password,John,Doe,0
+userid,password,firstname,lastname,networth,netdebt,netincome
+jdoe,password,John,Doe,200,0,0
