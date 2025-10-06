@@ -5,6 +5,6 @@ Today’s financial world is increasingly challenging in the consumer driven mar
 Our solution would be to develop an user-friendly expense tracker to assist people with seeing what payments would need to be made and to help users create and stick to a budget they create with our resources. In creating a budget the budget tracker will help assist in choosing which debt they want to pay off first or how much they can contribute to their savings based on the goals that they choose. 
 Our GUI will be able to take in a csv file or personal input and categorize to assist in visualising spending and help to create a budget and debt pay off plan. 
 
-/data
-userid.csv (ex: jdoe.csv) - Contains a users transaction history (debt, credits etc.)
-userlist.csv - Contains a list of eacher user & their ID, Firstname, Lastname, Balence
+Test User - John Doe
+userID: jdoe
+Password: password
