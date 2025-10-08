@@ -5,12 +5,44 @@
 import csv
 import math
 import pandas as pd
+from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import *
+from login import Ui_LoginWindow
+from dashboard import MainWindow
+import sys
 
 # Inital values 
 userdata = ["userid","userpass","firstname","lastname","networth","totaldebt","totalincome"]
 userQuit = False
 loggedin = False
+
+# login window and validation
+class LoginWindow (QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.ui = Ui_LoginWindow()
+        self.ui.setupUi(self)
+        self.ui.login_button.clicked.connect(self.check_login)
+    def check_login(self):
+        username = self.ui.user_box.text()
+        password = self.ui.pw_box.text()
+    ##validation
+        if username == userdata[0] and password == userdata[1]:
+            readUser(username)
+            self.dashboard = MainWindow()
+            self.dashboard.show()
+            self.close()
+            return
+        QMessageBox.warning(self, "Login Failed", "Invalid username or password.")
+
+
+#ui start up 
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = LoginWindow()
+    window.show()
+    sys.exit(app.exec_())
+
 
 # Functions
 # Updates the users data in both the program var & the CSV
@@ -38,10 +70,9 @@ def readUser(userid):
         userdata[6] = totalincome
         userdata[4] = totalincome - totaldebt
             
-
-
-# Program start
+#Program start  #currently not being used?
 while not loggedin and not userQuit:
+
     userdata[0] = input("\nWelcome, please enter your user ID: ")
     userdata[1] = input("Now, please enter your password: ")
     # Imports data from userdata.csv to the userdata list, then logs the signin

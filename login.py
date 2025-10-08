@@ -10,10 +10,11 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-
-class Ui_MainWindow(object):
+class Ui_LoginWindow(object):
+    def __init__(self):
+        super().__init__()
     def setupUi(self, MainWindow):
-        MainWindow.setObjectName("MainWindow")
+        MainWindow.setObjectName("LoginWindow")
         MainWindow.resize(1323, 771)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
@@ -25,7 +26,7 @@ class Ui_MainWindow(object):
         self.create_button.setObjectName("create_button")
         self.pw_box = QtWidgets.QLineEdit(self.centralwidget)
         self.pw_box.setGeometry(QtCore.QRect(200, 220, 201, 28))
-        self.pw_box.setObjectName("pw_box")
+        self.pw_box.setObjectName("pw_input")
         self.pass_label = QtWidgets.QLabel(self.centralwidget)
         self.pass_label.setGeometry(QtCore.QRect(200, 200, 81, 20))
         self.pass_label.setObjectName("pass_label")
@@ -34,7 +35,7 @@ class Ui_MainWindow(object):
         self.User_label.setObjectName("User_label")
         self.user_box = QtWidgets.QLineEdit(self.centralwidget)
         self.user_box.setGeometry(QtCore.QRect(200, 170, 201, 28))
-        self.user_box.setObjectName("user_box")
+        self.user_box.setObjectName("user_input")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1323, 25))
@@ -52,7 +53,11 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
+    def check_login(self):
 
+        self.main_window = Ui_Dashboard()
+        self.main_window.show()
+        self.close()
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
