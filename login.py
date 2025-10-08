@@ -54,9 +54,7 @@ class Ui_LoginWindow(object):
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
     def check_login(self):
-
-        self.main_window = Ui_Dashboard()
-        self.main_window.show()
+        #show second ui here or in main?
         self.close()
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate

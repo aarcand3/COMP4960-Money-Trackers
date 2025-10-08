@@ -28,7 +28,7 @@ class LoginWindow (QMainWindow):
         password = self.ui.pw_box.text()
     ##validation
         if username == userdata[0] and password == userdata[1]:
-            readUser(username)
+            ##readUser(username)
             self.dashboard = MainWindow()
             self.dashboard.show()
             self.close()
