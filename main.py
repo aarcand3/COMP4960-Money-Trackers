@@ -53,20 +53,25 @@ def importUser(userid):
     usertotals[0] = totalbalence - totaldebt
     print(usertotals) #DEBUG
 
-def logthis():
-    log_entry = {
-        "userid": userdata[0],
-        "firstname": userdata[2],
-        "lastname": userdata[3]
-    }
-    df = pd.DataFrame([log_entry])
-    hashes = pd.util.hash_pandas_object(df)
-    hashes.to_csv(
-        "test.log",
-        mode="a",
-        index=False,
-        header=not pd.io.common.file_exists("test.log")
-    )   
+def logthis(logname):
+    if logname == "test.log":
+        log_entry = {
+            "userid": userdata[0],
+            "firstname": userdata[2],
+            "lastname": userdata[3]
+        }
+        df = pd.DataFrame([log_entry])
+        hashes = pd.util.hash_pandas_object(df)
+        hashes.to_csv(
+            logname,
+            mode="a",
+            index=False,
+            header=not pd.io.common.file_exists(logname)
+        )
+
+    else:
+        # Put new logging code here!
+        pass
 
 
 # login window and validation
@@ -89,19 +94,7 @@ class LoginWindow (QMainWindow):
                     userdata[1] = row[1] # Password
                     userdata[2] = row[2] # Firstname
                     userdata[3] = row[3] # Lastname
-                    log_entry = {
-                        "userid": userdata[0],
-                        "firstname": userdata[2],
-                        "lastname": userdata[3]
-                    }
-                    df = pd.DataFrame([log_entry])
-                    hashes = pd.util.hash_pandas_object(df)
-                    hashes.to_csv(
-                        "test.log",
-                        mode="a",
-                        index=False,
-                        header=not pd.io.common.file_exists("test.log")
-                    )
+                    logthis("test.log")
                     MainDashBoard.logged_in(self, userdata[0])
                     self.close()
                     return
@@ -123,6 +116,10 @@ if __name__ == "__main__":
     window = LoginWindow()
     window.show()
     sys.exit(app.exec_())
+
+
+
+
 
 
 
