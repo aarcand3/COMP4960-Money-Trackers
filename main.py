@@ -12,14 +12,15 @@ from dashboard import MainWindow
 import sys
 
 # Inital values 
-userdata = ["userid","userpass","firstname","lastname","networth","totaldebt","totalincome", "totalbalence"]
+userdata = ["userid","userpass","firstname","lastname"]
+usertotals = ["networth", "totalbalence", "totaldebt", "totalincome"]
 userQuit = False
 loggedin = False
 
 # Functions
 # Updates the users data in both the program var & the CSV
 def importUser(userid):
-    global userdata
+    global usertotals
     totaldebt = 0
     totalincome = 0
     totalbalence = 0
@@ -31,7 +32,7 @@ def importUser(userid):
             if iteration != 0:
                 totaldebt += float(row[3])
             iteration += 1
-        userdata[5] = totaldebt
+        usertotals[2] = totaldebt
     # Calculate totalbalence from accounts.csv
     with open("data/"+userid+"/accounts.csv", mode="r") as data:
         csv_reader = csv.reader(data)
@@ -40,7 +41,7 @@ def importUser(userid):
             if iteration != 0:
                 totalbalence += float(row[2])
             iteration += 1
-        userdata[7] = totalbalence
+        usertotals[1] = totalbalence
     # Calculate total income from income.csv
     with open("data/"+userid+"/income.csv", mode="r") as data:
         csv_reader = csv.reader(data)
@@ -49,9 +50,10 @@ def importUser(userid):
             if iteration != 0:
                 totalincome += float(row[1])
             iteration += 1
-        userdata[6] = totalincome
+        usertotals[3] = totalincome
     # Calculate Networth by subtraacting totaldebt from totalbalence
-    userdata[4] = totalbalence - totaldebt
+    usertotals[0] = totalbalence - totaldebt
+    print(usertotals) #DEBUG
 
 
 # login window and validation
@@ -70,12 +72,10 @@ class LoginWindow (QMainWindow):
             for row in csv_reader:
                 if row[0] == userdata[0] and row[1] == userdata[1]:
                     importUser(userdata[0])
+                    userdata[0] = row[0] # UserID
+                    userdata[1] = row[1] # Password
                     userdata[2] = row[2] # Firstname
                     userdata[3] = row[3] # Lastname
-                    #userdata[4] = row[4] # Networth
-                    #userdata[5] = row[5] # Total Debt
-                    #userdata[6] = row[6] # Total Income
-                    #userdata[7] = row[7] # Total account value
                     loggedin = True
                     log_entry = {
                         "userid": userdata[0],
@@ -94,6 +94,7 @@ class LoginWindow (QMainWindow):
                     self.close()
                     return
             QMessageBox.warning(self, "Login Failed", "Invalid username or password.")
+            
 class MainDashBoard(QMainWindow):
     def __init__(self):
         super.__init__()
@@ -110,5 +111,8 @@ if __name__ == "__main__":
     window = LoginWindow()
     window.show()
     sys.exit(app.exec_())
+
+
+
 
 
