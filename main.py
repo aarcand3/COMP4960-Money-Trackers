@@ -10,9 +10,10 @@ from PyQt5.QtWidgets import *
 from login import Ui_LoginWindow
 from dashboard import MainWindow
 import sys
+import hashlib
 
 # Inital values 
-userdata = ["userid","userpass","firstname","lastname","networth","totaldebt","totalincome", "totalbalence"]
+userdata = ["userid","userpass","firstname","lastname","networth","totaldebt","totalincome", "totalbalance", "card"]
 userQuit = False
 loggedin = False
 
@@ -62,7 +63,7 @@ def importUser(userid):
     global userdata
     totaldebt = 0
     totalincome = 0
-    totalbalence = 0
+    totalbalance = 0
     # Calculate totaldebt from debt.csv
     with open("data/"+userid+"/debt.csv", mode="r") as data:
         csv_reader = csv.reader(data)
@@ -72,15 +73,15 @@ def importUser(userid):
                 totaldebt += float(row[3])
             iteration += 1
         userdata[5] = totaldebt
-    # Calculate totalbalence from accounts.csv
+    # Calculate totalbalance from accounts.csv
     with open("data/"+userid+"/accounts.csv", mode="r") as data:
         csv_reader = csv.reader(data)
         iteration = 0
         for row in csv_reader:
             if iteration != 0:
-                totalbalence += float(row[2])
+                totalbalance += float(row[2])
             iteration += 1
-        userdata[7] = totalbalence
+        userdata[7] = totalbalance
     # Calculate total income from income.csv
     with open("data/"+userid+"/income.csv", mode="r") as data:
         csv_reader = csv.reader(data)
@@ -90,8 +91,8 @@ def importUser(userid):
                 totalincome += float(row[1])
             iteration += 1
         userdata[6] = totalincome
-    # Calculate Networth by subtraacting totaldebt from totalbalence
-    userdata[4] = totalbalence - totaldebt
+    # Calculate Networth by subtraacting totaldebt from totalbalance
+    userdata[4] = totalbalance - totaldebt
     
             
 #Program start  #currently not being used?
@@ -111,6 +112,7 @@ while not loggedin and not userQuit:
                 #userdata[5] = row[5] # Total Debt
                 #userdata[6] = row[6] # Total Income
                 #userdata[7] = row[7] # Total account value
+                userdata[8] = row[8] # Credit Card
                 loggedin = True
                 log_entry = {
                     "userid": userdata[0],
@@ -135,7 +137,7 @@ while not loggedin and not userQuit:
 
             # While the user is still loggedin loop operations untill they logout
             while loggedin:
-                select = input("Please make a selection\n\n[quit] Logout & Close\n[logout] Return to login page\n[1] Check Networth\n[2] Check total Debt\n[3] Check total income\n[4] Check total balence\n\nPlease make your selection: ")
+                select = input("Please make a selection\n\n[quit] Logout & Close\n[logout] Return to login page\n[1] Check Networth\n[2] Check total Debt\n[3] Check total income\n[4] Check total balance\n[5] Input Card\nPlease make your selection: ")
                 if select == "quit":
                     userQuit = True
                     loggedin = False
@@ -143,13 +145,28 @@ while not loggedin and not userQuit:
                     userdata[0] = "userid"
                     loggedin = False
                 elif select == "1":
-                    print("\nYour Networth is: "+str(userdata[4])+"\n") # Calculated by subtracting total debt from total balence
+                    print("\nYour Networth is: "+str(userdata[4])+"\n") # Calculated by subtracting total debt from total balance
                 elif select == "2":
                     print("\nYour total debt is: "+str(userdata[5])+"\n")
                 elif select == "3":
                     print("\nYour total income is: "+str(userdata[6])+"\n")
                 elif select == "4":
-                    print("\nThe total balence: "+str(userdata[7])+"\n")
+                    print("\nThe total balance: "+str(userdata[7])+"\n")
+                elif select == "5":
+                    card = input("Please Insert Your Card Here")
+                    card_hash = hashlib.sha256(card.encode()).hexdigest()
+        
+                    log_entry = {
+                    "userid": userdata[0], "card_hash": card_hash 
+                    }
+
+                    df = pd.DataFrame([log_entry])
+                    df.to_csv(
+                    "card.log",
+                    mode="a",
+                    index=False,
+                    header=not pd.io.common.file_exists("card.log")
+                ) 
                 else:
                     print("\nInvalid, try again\n")
         else:                
