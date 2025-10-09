@@ -90,12 +90,18 @@ class LoginWindow (QMainWindow):
                         index=False,
                         header=not pd.io.common.file_exists("test.log")
                     )
-                    
+                    MainDashBoard.logged_in(self, userdata[0])
+                    self.close()
+                    return
+            QMessageBox.warning(self, "Login Failed", "Invalid username or password.")
+class MainDashBoard(QMainWindow):
+    def __init__(self):
+        super.__init__()
         self.dashboard = MainWindow()
-        self.dashboard.show()
-        self.close()
-        return
-        QMessageBox.warning(self, "Login Failed", "Invalid username or password.")
+        self.dashboard.setupUi(self)
+    def logged_in(self, username):
+            self.dashboard = MainWindow()
+            self.dashboard.show()
 
 
 #ui start up 
