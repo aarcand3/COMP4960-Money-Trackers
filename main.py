@@ -14,8 +14,6 @@ import sys
 # Inital values 
 userdata = ["userid","userpass","firstname","lastname"]
 usertotals = ["networth", "totalbalence", "totaldebt", "totalincome"]
-userQuit = False
-loggedin = False
 
 # Functions
 # Updates the users data in both the program var & the CSV
@@ -55,6 +53,21 @@ def importUser(userid):
     usertotals[0] = totalbalence - totaldebt
     print(usertotals) #DEBUG
 
+def logthis():
+    log_entry = {
+        "userid": userdata[0],
+        "firstname": userdata[2],
+        "lastname": userdata[3]
+    }
+    df = pd.DataFrame([log_entry])
+    hashes = pd.util.hash_pandas_object(df)
+    hashes.to_csv(
+        "test.log",
+        mode="a",
+        index=False,
+        header=not pd.io.common.file_exists("test.log")
+    )   
+
 
 # login window and validation
 class LoginWindow (QMainWindow):
@@ -76,7 +89,6 @@ class LoginWindow (QMainWindow):
                     userdata[1] = row[1] # Password
                     userdata[2] = row[2] # Firstname
                     userdata[3] = row[3] # Lastname
-                    loggedin = True
                     log_entry = {
                         "userid": userdata[0],
                         "firstname": userdata[2],
@@ -111,6 +123,9 @@ if __name__ == "__main__":
     window = LoginWindow()
     window.show()
     sys.exit(app.exec_())
+
+
+
 
 
 
