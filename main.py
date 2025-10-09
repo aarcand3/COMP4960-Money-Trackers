@@ -1,7 +1,7 @@
 # Money Trackers - Team 1
 # Jack Donahue, Simon, Allison, Sonia
 
-# Library imports
+# Library imports & Initial Values
 import csv
 import math
 import pandas as pd
@@ -11,13 +11,13 @@ from login import Ui_LoginWindow
 from dashboard import MainWindow
 import sys
 
-# Inital values 
 userdata = ["userid","userpass","firstname","lastname"]
 usertotals = ["networth", "totalbalence", "totaldebt", "totalincome"]
 
+
 # Functions
-# Updates the users data in both the program var & the CSV
 def importUser(userid):
+# Updates the users data in both the program var & the CSV
     global usertotals
     totaldebt = 0
     totalincome = 0
@@ -51,10 +51,10 @@ def importUser(userid):
         usertotals[3] = totalincome
     # Calculate Networth by subtraacting totaldebt from totalbalence
     usertotals[0] = totalbalence - totaldebt
-    print(usertotals) #DEBUG
 
 def logthis(logname):
-    if logname == "test.log":
+    # 
+    if logname == "login.log":
         log_entry = {
             "userid": userdata[0],
             "firstname": userdata[2],
@@ -63,15 +63,18 @@ def logthis(logname):
         df = pd.DataFrame([log_entry])
         hashes = pd.util.hash_pandas_object(df)
         hashes.to_csv(
-            logname,
+            "logs/"+logname,
             mode="a",
             index=False,
-            header=not pd.io.common.file_exists(logname)
+            header=not pd.io.common.file_exists("logs/"+logname)
         )
 
-    else:
+    elif False:
         # Put new logging code here!
         pass
+        
+    else:
+        print("ERROR! Could not find: "+logname+" is it configured?")
 
 
 # login window and validation
@@ -94,7 +97,7 @@ class LoginWindow (QMainWindow):
                     userdata[1] = row[1] # Password
                     userdata[2] = row[2] # Firstname
                     userdata[3] = row[3] # Lastname
-                    logthis("test.log")
+                    logthis("login.log")
                     MainDashBoard.logged_in(self, userdata[0])
                     self.close()
                     return
@@ -116,6 +119,9 @@ if __name__ == "__main__":
     window = LoginWindow()
     window.show()
     sys.exit(app.exec_())
+
+
+
 
 
 
