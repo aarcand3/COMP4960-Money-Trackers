@@ -27,14 +27,26 @@ class LoginWindow (QMainWindow):
         username = self.ui.user_box.text()
         password = self.ui.pw_box.text()
     ##validation
-        if username == userdata[0] and password == userdata[1]:
-            ##readUser(username)
-            self.dashboard = MainWindow()
-            self.dashboard.show()
-            self.close()
-            return
-        QMessageBox.warning(self, "Login Failed", "Invalid username or password.")
-
+        with open("data/userlist.csv", mode="r")as data:
+            csv_reader = csv.reader(data)
+            for row in csv_reader:
+                if row[0] == username and  row[1] == password:
+                    userdata[0]= row[0] # username
+                    userdata[1]= row[1] # password
+                    userdata[2]= row[2] # firstname
+                    userdata[3]= row[3] # lastname
+                self.dashboard = MainWindow()
+                self.dashboard.show()
+                self.close()
+                return
+            QMessageBox.warning(self, "Login Failed", "Invalid username or password.")
+# not yet needed/connected 
+#class MainDashBoard(QMainWindow):
+    #def __init__(self):
+        
+        #super.__init__()
+        #self.dashboard = MainWindow()
+        #self.dashboard.setupUi(self)
 
 #ui start up 
 if __name__ == "__main__":
