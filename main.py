@@ -8,7 +8,7 @@ import pandas as pd
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import *
 from login import Ui_LoginWindow
-from dashboard import MainWindow
+from dashboard import Ui_MainWindow
 import sys
 
 userdata = ["userid","userpass","firstname","lastname"]
@@ -98,19 +98,24 @@ class LoginWindow (QMainWindow):
                     userdata[2] = row[2] # Firstname
                     userdata[3] = row[3] # Lastname
                     logthis("login.log")
-                    MainDashBoard.logged_in(self, userdata[0])
+                    self.dashboard_window = MainDashBoard()
+                    self.dashboard_window.logged_in(userdata[0])
+                    self.dashboard_window.show()
                     self.close()
                     return
             QMessageBox.warning(self, "Login Failed", "Invalid username or password.")
             
 class MainDashBoard(QMainWindow):
     def __init__(self):
-        super.__init__()
-        self.dashboard = MainWindow()
+        super().__init__()
+        self.dashboard = Ui_MainWindow()
         self.dashboard.setupUi(self)
+        self.dashboard.logoutButton.clicked.connect(self.logout)
     def logged_in(self, username):
-            self.dashboard = MainWindow()
-            self.dashboard.show()
+            self.dashboard.welcome_label.setText(f"Welcome, {username}")
+
+    def logout(self):
+        self.close()     
 
 
 #ui start up 
