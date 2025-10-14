@@ -71,6 +71,7 @@ def logthis(logname):
         }
         df = pd.DataFrame([log_entry])
 
+        #Hashes userid, firstname and lastname without hashing date and time.
         for col in ["userid", "firstname", "lastname"]:
             df[col] = pd.util.hash_pandas_object(df[col], index=False).astype(str)
 
