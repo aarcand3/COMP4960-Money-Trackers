@@ -47,7 +47,7 @@ def importUser(userid):
         iteration = 0
         for row in csv_reader:
             if iteration != 0:
-                totalincome += float(row[1])
+                totalincome += float(row[2])
             iteration += 1
         usertotals[3] = totalincome
     # Calculate Networth by subtraacting totaldebt from totalbalence
