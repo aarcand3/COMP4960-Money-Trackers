@@ -9,6 +9,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import *
 from login import Ui_LoginWindow
 from dashboard import Ui_MainWindow
+from datetime import datetime
 import sys
 
 userdata = ["userid","userpass","firstname","lastname"]
@@ -46,7 +47,7 @@ def importUser(userid):
         iteration = 0
         for row in csv_reader:
             if iteration != 0:
-                totalincome += float(row[1])
+                totalincome += float(row[2])
             iteration += 1
         usertotals[3] = totalincome
     # Calculate Networth by subtraacting totaldebt from totalbalence
@@ -55,14 +56,26 @@ def importUser(userid):
 def logthis(logname):
     # 
     if logname == "login.log":
+        #Gets Current Time and Converts to String
+        now = datetime.now()
+        date_str = now.strftime("%Y-%m-%d")
+        time_str = now.strftime("%H:%M:%S")
+
+
         log_entry = {
+            "date": date_str,
+            "time": time_str,
             "userid": userdata[0],
             "firstname": userdata[2],
             "lastname": userdata[3]
         }
         df = pd.DataFrame([log_entry])
-        hashes = pd.util.hash_pandas_object(df)
-        hashes.to_csv(
+
+        #Hashes userid, firstname and lastname without hashing date and time.
+        for col in ["userid", "firstname", "lastname"]:
+            df[col] = pd.util.hash_pandas_object(df[col], index=False).astype(str)
+
+        df.to_csv(
             "logs/"+logname,
             mode="a",
             index=False,
