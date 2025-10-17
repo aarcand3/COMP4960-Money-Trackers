@@ -52,6 +52,38 @@ def importUser(userid):
         usertotals[3] = totalincome
     # Calculate Networth by subtraacting totaldebt from totalbalence
     usertotals[0] = totalbalence - totaldebt
+def addExpense(userid):
+    # Manually input expenses to purchaces.csv
+    filepath = f"data/{userid}/purchaces.csv"
+    
+    # User Inputs Information Here
+    print("\n=== Add New Expense ===")
+    date = input("Enter date (MM/DD/YY): ").strip()
+    card = input("Enter card used (e.g., Amex, Visa): ").strip()
+    category = input("Enter expense type (e.g., Food, Taxi, Electronics): ").strip()
+    try:
+        amount = float(input("Enter amount: ").strip())
+    except ValueError:
+        print("Invalid amount. Please enter a numeric value.")
+        return
+    
+    # Creates a dictionary to allow for appending.
+    expense_entry = {
+        "date": date,
+        "card": card,
+        "type": category,
+        "amount": amount
+    }
+
+    # Appends to purchaces
+    df = pd.DataFrame([expense_entry])
+    df.to_csv(
+        filepath,
+        mode="a",
+        index=False,
+        header=not pd.io.common.file_exists(filepath)
+    )
+    print(f"Expense successfully added for user '{userid}'!\n")
 
 def logthis(logname):
     # 
