@@ -40,7 +40,7 @@ class Ui_MainWindow(object):
         self.update_pushButton.setGeometry(QtCore.QRect(40, 630, 90, 29))
         self.update_pushButton.setObjectName("update_pushButton")
         self.transaction_tableView = QtWidgets.QTableView(self.centralwidget)
-        self.transaction_tableView.setGeometry(QtCore.QRect(550, 60, 391, 251))
+        self.transaction_tableView.setGeometry(QtCore.QRect(550, 60, 500, 500))
         self.transaction_tableView.setObjectName("transaction_tableView")
         self.transaction_label = QtWidgets.QLabel(self.centralwidget)
         self.transaction_label.setGeometry(QtCore.QRect(550, 30, 151, 20))

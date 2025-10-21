@@ -6,6 +6,7 @@ import csv
 import math
 import pandas as pd
 from PyQt5 import QtWidgets
+from PyQt5.QtGui import QStandardItemModel, QStandardItem
 from PyQt5.QtWidgets import *
 from login import Ui_LoginWindow
 from dashboard import Ui_MainWindow
@@ -111,6 +112,7 @@ class LoginWindow (QMainWindow):
                     userdata[2] = row[2] # Firstname
                     userdata[3] = row[3] # Lastname
                     logthis("login.log")
+                    self
                     self.dashboard_window = MainDashBoard()
                     self.dashboard_window.logged_in(userdata[0])
                     self.dashboard_window.show()
@@ -124,9 +126,24 @@ class MainDashBoard(QMainWindow):
         self.dashboard = Ui_MainWindow()
         self.dashboard.setupUi(self)
         self.dashboard.logoutButton.clicked.connect(self.logout)
+        
     def logged_in(self, username):
-            self.dashboard.welcome_label.setText(f"Welcome, {username}")
-
+        self.dashboard.welcome_label.setText(f"Welcome, {username}")
+        self.dashboard.transaction_tableView.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.load_widgets(username)   
+    def load_widgets(self, username):
+        model = QStandardItemModel()
+        try:
+            with open(f"data/{username}/purchaces.csv", mode="r") as file:
+                reader = csv.reader(file)
+                headers = next(reader)
+                model.setHorizontalHeaderLabels(headers)
+                for row in reader:
+                    items = [QStandardItem(cell) for cell in row]
+                    model.appendRow(items)
+            self.dashboard.transaction_tableView.setModel(model)
+        except FileNotFoundError:
+            QMessageBox.warning(self,"Missing File", f"Could not find file for {username}")
     def logout(self):
         self.close()     
 
