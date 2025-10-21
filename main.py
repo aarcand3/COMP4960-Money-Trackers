@@ -6,7 +6,10 @@ import csv
 import math
 import pandas as pd
 from PyQt5 import QtWidgets
+from PyQt5.QtGui import QStandardItemModel, QStandardItem, QPainter
+from PyQt5.QtChart import QChart, QChartView, QPieSeries ##If not loading for team pip install PyQtChart
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import *
 from login import Ui_LoginWindow
 from dashboard import Ui_MainWindow
@@ -161,8 +164,9 @@ class MainDashBoard(QMainWindow):
         
     def logged_in(self, username):
         self.dashboard.welcome_label.setText(f"Welcome, {username}")
-        self.dashboard.transaction_tableView.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        
         self.load_widgets(username)   
+        self.show_charts(username)
     def load_widgets(self, username):
         model = QStandardItemModel()
         try:
@@ -176,6 +180,62 @@ class MainDashBoard(QMainWindow):
             self.dashboard.transaction_tableView.setModel(model)
         except FileNotFoundError:
             QMessageBox.warning(self,"Missing File", f"Could not find file for {username}")
+    def create_chart(self, title, data_dict):
+        series = QPieSeries()
+        for label, value in data_dict.items():
+            series.append(label, value)
+
+        chart = QChart()
+        chart.addSeries(series)
+        chart.setTitle(title)
+        chart.legend().setVisible(True)
+        chart.legend().setAlignment(Qt.AlignBottom)
+
+        chart_view = QChartView(chart)
+        chart_view.setRenderHint(QPainter.Antialiasing)
+
+        widget = QWidget()
+        layout = QVBoxLayout()
+        layout.addWidget(chart_view)
+        widget.setLayout(layout)
+        return widget
+
+    def show_charts(self, username):
+        try:
+            with open(f"data/{username}/debt.csv", mode="r") as debtfile:
+                debtreader = csv.reader(debtfile)
+                debt_data = {}
+                next(debtreader, None) 
+                for row in debtreader:
+                    if len(row) >= 2:
+                        label = row[1].strip().title()
+                        value = float(row[3])
+                        debt_data[label] = value
+        except FileNotFoundError:
+            QMessageBox.warning(self,"Missing File", f"Could not find file for {username}")
+        try:
+            with open(f"data/{username}/income.csv", mode="r") as incomefile:
+                incomereader = csv.reader(incomefile)
+                income_data = {}
+                next(incomereader, None) 
+                for row in incomereader:
+                    if len(row) >= 2:
+                        label = row[1].strip().title()
+                        value = float(row[2])
+                        income_data[label] = value
+        except FileNotFoundError:
+            QMessageBox.warning(self,"Missing File", f"Could not find file for {username}")
+
+        chart_widget = self.create_chart("Debt Breakdown", debt_data)
+        self.dashboard.tracking_tabWidget.addTab(chart_widget, "Debt Chart")
+        chart_widget = self.create_chart("Income Sources", income_data)
+        self.dashboard.tracking_tabWidget.addTab(chart_widget, "Income Chart")
+        for i in reversed(range(self.dashboard.tracking_tabWidget.count())):
+            tab = self.dashboard.tracking_tabWidget.widget(i)
+            if tab.layout() is None or tab.layout().isEmpty():
+                self.dashboard.tracking_tabWidget.removeTab(i)
+
+    
     def logout(self):
         self.close()     
 
