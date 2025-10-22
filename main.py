@@ -147,6 +147,42 @@ def logthis(logname):
         print("ERROR! Could not find: "+logname+" is it configured?")
 
 
+#function reads a user's debt CSV file
+def load_debt_data(username):
+        csv_path = f"data/{username}/debt.csv"
+        debts = []
+        try:
+            with open(csv_path, 'r') as file:
+                reader = csv.DictReader(file)
+                for row in reader:
+                    vendor = row['card'].strip()
+                    balance = float(row['balance'])
+                    interest_str = row['interest'].strip().replace('%', '')  # ✅ Strip %
+                    interest = float(interest_str)
+                    debts.append({
+                        'vendor': vendor,
+                        'balance': balance,
+                        'interest': interest
+                    })
+        except FileNotFoundError:
+            print(f"⚠️ Debt file not found for user: {username}")
+        except Exception as e:
+            print(f"⚠️ Error loading debt data for {username}: {e}")
+        return debts
+
+#Calculates total debt
+#sort the list by interest rate
+
+def summarize_debt(debts):
+            total_debt = sum(d['balance'] for d in debts)
+            for d in debts:
+                d['monthly_interest'] = (d['balance'] * d['interest']) / 12 / 100
+                d['annual_interest'] = (d['balance'] * d['interest']) / 100
+            sorted_debts = sorted(debts, key=lambda x: x['interest'], reverse=True)
+            return total_debt, sorted_debts
+
+
+
 # login window and validation
 class LoginWindow (QMainWindow):
     def __init__(self):
@@ -258,7 +294,9 @@ class MainDashBoard(QMainWindow):
 
     
     def logout(self):
-        self.close()     
+        self.close()
+
+
 
 
 #ui start up 
