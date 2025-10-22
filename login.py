@@ -27,6 +27,7 @@ class Ui_LoginWindow(object):
         self.pw_box = QtWidgets.QLineEdit(self.centralwidget)
         self.pw_box.setGeometry(QtCore.QRect(200, 220, 201, 28))
         self.pw_box.setObjectName("pw_input")
+        self.pw_box.setEchoMode(QtWidgets.QLineEdit.Password) #Finally hides password
         self.pass_label = QtWidgets.QLabel(self.centralwidget)
         self.pass_label.setGeometry(QtCore.QRect(200, 200, 81, 20))
         self.pass_label.setObjectName("pass_label")
