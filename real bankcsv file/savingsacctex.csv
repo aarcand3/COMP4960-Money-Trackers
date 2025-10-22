@@ -1,0 +1,12 @@
+For Account:,#####,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+TransactionDate,TransactionType,Description,Categories,Amount,Balance
+,,,,,
+10/8/2025,Transfer Out,TRANSFER MONEY TO EXTERNAL XXXXXX8862 Reference Number: 1106591395,Unassigned,-100,1206.74
+10/7/2025,Transfer In,TRANSFER MONEY FROM EXTERNAL XXXXXX8862 Reference Number: 1005113395,Unassigned,300,1306.74
+9/30/2025,Interest,INTEREST,Unassigned,6.74,1006.74
+9/22/2025,Transfer Out,TRANSFER MONEY TO EXTERNAL XXXXXX8862 Reference Number: 149275427906,Unassigned,-300,1000
