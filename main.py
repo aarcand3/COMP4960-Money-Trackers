@@ -164,7 +164,7 @@ class MainDashBoard(QMainWindow):
         
     def logged_in(self, username):
         self.dashboard.welcome_label.setText(f"Welcome, {username}")
-        
+        self.dashboard.transaction_tableView.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.load_widgets(username)   
         self.show_charts(username)
     def load_widgets(self, username):
