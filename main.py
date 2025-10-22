@@ -15,6 +15,7 @@ from login import Ui_LoginWindow
 from dashboard import Ui_MainWindow
 from datetime import datetime
 import sys
+import os
 
 userdata = ["userid","userpass","firstname","lastname"]
 usertotals = ["networth", "totalbalence", "totaldebt", "totalincome"]
@@ -59,6 +60,9 @@ def importUser(userid):
 def addExpense(userid):
     # Manually input expenses to purchaces.csv
     filepath = f"data/{userid}/purchaces.csv"
+
+    # Makes sure the path is a valid path that exists
+    os.makedirs(os.path.dirname(filepath), exist_ok=True)
     
     # User Inputs Information Here
     print("\n=== Add New Expense ===")
@@ -79,15 +83,32 @@ def addExpense(userid):
         "amount": amount
     }
 
-    # Appends to purchaces
+    # Creates dataframe
     df = pd.DataFrame([expense_entry])
-    df.to_csv(
-        filepath,
-        mode="a",
-        index=False,
-        header=not pd.io.common.file_exists(filepath)
-    )
-    print(f"Expense successfully added for user '{userid}'!\n")
+
+    # Appends to csv file if it exists, creates one if it doesn't.
+    file_exists = os.path.exists(filepath)
+    if file_exists:
+        try:
+            df_existing = pd.read_csv(filepath)
+
+            # Ensures columns are consistent
+            if not all(col in df_existing.columns for col in df.columns):
+                print("Warning: Column mismatch detected. Adjusting...")
+                for col in df.columns:
+                    if col not in df_existing.columns:
+                        df_existing[col] = None
+                df_existing = df_existing[df.columns]
+
+            df.to_csv(filepath, mode="a", header=False, index=False)
+        except Exception as e:
+            print(f"Error appending to existing CSV: {e}")
+    else:
+        df.to_csv(filepath, mode="w", index=False)
+
+
+    
+    print(f"Expense successfully added for user '{userid}'\n")
 
 def logthis(logname):
     # 
@@ -124,6 +145,42 @@ def logthis(logname):
         
     else:
         print("ERROR! Could not find: "+logname+" is it configured?")
+
+
+#function reads a user's debt CSV file
+def load_debt_data(username):
+        csv_path = f"data/{username}/debt.csv"
+        debts = []
+        try:
+            with open(csv_path, 'r') as file:
+                reader = csv.DictReader(file)
+                for row in reader:
+                    vendor = row['card'].strip()
+                    balance = float(row['balance'])
+                    interest_str = row['interest'].strip().replace('%', '')  # ✅ Strip %
+                    interest = float(interest_str)
+                    debts.append({
+                        'vendor': vendor,
+                        'balance': balance,
+                        'interest': interest
+                    })
+        except FileNotFoundError:
+            print(f"⚠️ Debt file not found for user: {username}")
+        except Exception as e:
+            print(f"⚠️ Error loading debt data for {username}: {e}")
+        return debts
+
+#Calculates total debt
+#sort the list by interest rate
+
+def summarize_debt(debts):
+            total_debt = sum(d['balance'] for d in debts)
+            for d in debts:
+                d['monthly_interest'] = (d['balance'] * d['interest']) / 12 / 100
+                d['annual_interest'] = (d['balance'] * d['interest']) / 100
+            sorted_debts = sorted(debts, key=lambda x: x['interest'], reverse=True)
+            return total_debt, sorted_debts
+
 
 
 # login window and validation
@@ -237,7 +294,9 @@ class MainDashBoard(QMainWindow):
 
     
     def logout(self):
-        self.close()     
+        self.close()
+
+
 
 
 #ui start up 
