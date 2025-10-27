@@ -190,6 +190,27 @@ class LoginWindow (QMainWindow):
         self.ui = Ui_LoginWindow()
         self.ui.setupUi(self)
         self.ui.login_button.clicked.connect(self.check_login)
+        self.ui.create_button.clicked.connect(self.create_user)
+    def create_user(self):
+        userdata[0] = self.ui.user_box.text()
+        userdata[1] = self.ui.pw_box.text()
+    ##creating user
+        with open("data/userlist.csv", mode="w") as data:
+            csv_reader = csv.reader(data)
+            for row in csv_reader:
+                if row[0] != userdata[0] and row[0] == None:
+                    userdata[0] = row[0]
+                    userdata[1] = row[1]
+                    logthis("login.log")
+                    self.dashboard_window = MainDashBoard()
+                    self.dashboard_window.logged_in(userdata[0])
+                    self.dashboard_window.show()
+                    self.close()
+                    return
+                else:
+                    QMessageBox.warning(self, "Cannot Create User.", "User already exists.")
+                
+
     def check_login(self):
         userdata[0] = self.ui.user_box.text()
         userdata[1] = self.ui.pw_box.text()
@@ -204,7 +225,6 @@ class LoginWindow (QMainWindow):
                     userdata[2] = row[2] # Firstname
                     userdata[3] = row[3] # Lastname
                     logthis("login.log")
-                    self
                     self.dashboard_window = MainDashBoard()
                     self.dashboard_window.logged_in(userdata[0])
                     self.dashboard_window.show()
