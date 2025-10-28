@@ -7,17 +7,17 @@
     <x>0</x>
     <y>0</y>
     <width>1265</width>
-    <height>727</height>
+    <height>840</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <property name="autoFillBackground">
-   <bool>false</bool>
+   <bool>true</bool>
   </property>
   <property name="styleSheet">
-   <string notr="true"/>
+   <string notr="true">background: rgb(211, 255, 197)</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QLabel" name="welcome_label">
@@ -28,6 +28,9 @@
       <width>111</width>
       <height>20</height>
      </rect>
+    </property>
+    <property name="autoFillBackground">
+     <bool>false</bool>
     </property>
     <property name="text">
      <string>Welcome user!</string>
@@ -54,24 +57,24 @@
     </item>
     <item>
      <property name="text">
-      <string>Manually Input Transactions</string>
+      <string>Add New Account</string>
      </property>
     </item>
     <item>
      <property name="text">
-      <string>Check Balance</string>
+      <string>Manually Input a Transaction</string>
      </property>
     </item>
     <item>
      <property name="text">
-      <string>Savings Goals</string>
+      <string>Add New Savings Goal</string>
      </property>
     </item>
    </widget>
    <widget class="QProgressBar" name="debt_progressBar">
     <property name="geometry">
      <rect>
-      <x>40</x>
+      <x>30</x>
       <y>570</y>
       <width>231</width>
       <height>41</height>
@@ -90,7 +93,7 @@
    <widget class="QPushButton" name="update_pushButton">
     <property name="geometry">
      <rect>
-      <x>40</x>
+      <x>30</x>
       <y>630</y>
       <width>90</width>
       <height>29</height>
@@ -103,17 +106,17 @@
    <widget class="QTableView" name="transaction_tableView">
     <property name="geometry">
      <rect>
-      <x>550</x>
-      <y>60</y>
-      <width>391</width>
-      <height>251</height>
+      <x>520</x>
+      <y>50</y>
+      <width>471</width>
+      <height>261</height>
      </rect>
     </property>
    </widget>
    <widget class="QLabel" name="transaction_label">
     <property name="geometry">
      <rect>
-      <x>550</x>
+      <x>530</x>
       <y>30</y>
       <width>151</width>
       <height>20</height>
@@ -126,14 +129,14 @@
    <widget class="QTabWidget" name="tracking_tabWidget">
     <property name="geometry">
      <rect>
-      <x>550</x>
-      <y>330</y>
-      <width>361</width>
-      <height>291</height>
+      <x>530</x>
+      <y>320</y>
+      <width>461</width>
+      <height>351</height>
      </rect>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="income_tab">
      <property name="autoFillBackground">
@@ -164,6 +167,101 @@
     </property>
     <property name="text">
      <string>Logout</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton">
+    <property name="geometry">
+     <rect>
+      <x>220</x>
+      <y>110</y>
+      <width>90</width>
+      <height>29</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Submit</string>
+    </property>
+   </widget>
+   <widget class="QFrame" name="frame">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>110</y>
+      <width>181</width>
+      <height>101</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background: rgb(255, 255, 255)</string>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::Shape::StyledPanel</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Shadow::Raised</enum>
+    </property>
+    <widget class="QLabel" name="label">
+     <property name="geometry">
+      <rect>
+       <x>40</x>
+       <y>40</y>
+       <width>121</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Drop Files Here</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QTableWidget" name="tableWidget">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>341</y>
+      <width>481</width>
+      <height>211</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEdit">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>240</y>
+      <width>113</width>
+      <height>28</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QDateEdit" name="dateEdit">
+    <property name="geometry">
+     <rect>
+      <x>380</x>
+      <y>240</y>
+      <width>110</width>
+      <height>29</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEdit_2">
+    <property name="geometry">
+     <rect>
+      <x>250</x>
+      <y>240</y>
+      <width>113</width>
+      <height>28</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="comboBox">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>240</y>
+      <width>82</width>
+      <height>28</height>
+     </rect>
     </property>
    </widget>
   </widget>

@@ -238,16 +238,32 @@ class MainDashBoard(QMainWindow):
         self.dashboard = Ui_MainWindow()
         self.dashboard.setupUi(self)
         self.dashboard.logoutButton.clicked.connect(self.logout)
-        
+        self.setStyleSheet(f"""
+        QWidget {{
+            background-color:  #D8E4DC;  /* Light sage green */;
+        }}
+        QPushButton {{
+            background-color: #4B6B50;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+        }}
+        QPushButton:hover {{
+            background-color: #5F7F65;
+        }}
+        QPushButton:pressed {{
+            background-color: #3F5B40;
+        }}
+        """)
     def logged_in(self, username):
         self.dashboard.welcome_label.setText(f"Welcome, {username}")
-        self.dashboard.transaction_tableView.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.load_widgets(username)   
         self.show_charts(username)
     def load_widgets(self, username):
         model = QStandardItemModel()
         try:
-            with open(f"data/{username}/purchaces.csv", mode="r") as file:
+            with open(f"data/{username}/purchases.csv", mode="r") as file:
                 reader = csv.reader(file)
                 headers = next(reader)
                 model.setHorizontalHeaderLabels(headers)
@@ -275,6 +291,9 @@ class MainDashBoard(QMainWindow):
         layout = QVBoxLayout()
         layout.addWidget(chart_view)
         widget.setLayout(layout)
+        chart_view.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        layout.setContentsMargins(0, 0, 0, 0)
+
         return widget
 
     def show_charts(self, username):
@@ -317,26 +336,9 @@ class MainDashBoard(QMainWindow):
         self.close()
 
 
-
-
 #ui start up 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = LoginWindow()
     window.show()
     sys.exit(app.exec_())
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
