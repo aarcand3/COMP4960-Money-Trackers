@@ -181,6 +181,83 @@ def summarize_debt(debts):
             sorted_debts = sorted(debts, key=lambda x: x['interest'], reverse=True)
             return total_debt, sorted_debts
 
+# function Save or update a savings goal for a specific user.
+def saveCategoryGoal(userid, category, amount, due_date):
+    try:
+        path = f"data/{userid}/goals.csv"
+        if os.path.exists(path):
+            df = pd.read_csv(path)
+        else:
+            df = pd.DataFrame(columns=["Category", "GoalAmount", "DueDate"])
+
+        if category in df["Category"].values:
+            df.loc[df["Category"] == category, ["GoalAmount", "DueDate"]] = [amount, due_date]
+        else:
+            new_row = pd.DataFrame([{"Category": category, "GoalAmount": amount, "DueDate": due_date}])
+            df = pd.concat([df, new_row], ignore_index=True)
+
+        df.to_csv(path, index=False)
+        return True
+    except Exception as e:
+        return {"error": str(e)}
+
+#Returns a list of all saved goals (category, amount, due date), progress
+def getAllGoalsWithProgress(userid):
+
+    accounts_path = f"data/{userid}/accounts.csv"
+    goals_path = f"data/{userid}/goals.csv"
+
+    if not os.path.exists(accounts_path) or not os.path.exists(goals_path):
+        return []
+
+    accounts_df = pd.read_csv(accounts_path)
+    goals_df = pd.read_csv(goals_path)
+
+    accounts_df["balance"] = pd.to_numeric(accounts_df["balance"], errors="coerce").fillna(0)
+    total_balance = accounts_df["balance"].sum()
+
+    enriched_goals = []
+    for _, row in goals_df.iterrows():
+        category = row["Category"]
+        goal_amount = float(row["GoalAmount"])
+        due_date = row["DueDate"]
+
+        progress_percent = round((total_balance / goal_amount) * 100, 2) if goal_amount > 0 else 0
+        goal_met = progress_percent >= 100
+
+        enriched_goals.append({
+            "Category": category,
+            "GoalAmount": goal_amount,
+            "DueDate": due_date,
+            "ProgressPercent": progress_percent,
+            "GoalMet": goal_met
+        })
+
+    return enriched_goals
+
+#Returns total savings progress across all goals
+def getTotalSavingsProgress(userid):
+    accounts_path = f"data/{userid}/accounts.csv"
+    goals_path = f"data/{userid}/goals.csv"
+
+    if not os.path.exists(accounts_path) or not os.path.exists(goals_path):
+        return None
+
+    accounts_df = pd.read_csv(accounts_path)
+    goals_df = pd.read_csv(goals_path)
+
+    # Use lowercase 'balance' column
+    accounts_df["balance"] = pd.to_numeric(accounts_df["balance"], errors="coerce").fillna(0)
+    total_balance = accounts_df["balance"].sum()
+
+    goals_df["GoalAmount"] = pd.to_numeric(goals_df["GoalAmount"], errors="coerce").fillna(0)
+    total_goal_amount = goals_df["GoalAmount"].sum()
+
+    if total_goal_amount == 0:
+        return 0.0
+
+    total_progress = round((total_balance / total_goal_amount) * 100, 2)
+    return total_progress
 
 
 # login window and validation
@@ -231,7 +308,8 @@ class LoginWindow (QMainWindow):
                     self.close()
                     return
             QMessageBox.warning(self, "Login Failed", "Invalid username or password.")
-            
+
+
 class MainDashBoard(QMainWindow):
     def __init__(self):
         super().__init__()
