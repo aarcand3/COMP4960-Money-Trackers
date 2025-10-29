@@ -238,6 +238,7 @@ class MainDashBoard(QMainWindow):
         self.dashboard = Ui_MainWindow()
         self.dashboard.setupUi(self)
         self.dashboard.logoutButton.clicked.connect(self.logout)
+        self.dashboard.add_expense_button.clicked.connect(self.add_expense)
         self.setStyleSheet(f"""
         QWidget {{
             background-color:  #D8E4DC;  /* Light sage green */;
@@ -273,6 +274,18 @@ class MainDashBoard(QMainWindow):
             self.dashboard.transaction_tableView.setModel(model)
         except FileNotFoundError:
             QMessageBox.warning(self,"Missing File", f"Could not find file for {username}")
+
+        debt_model = QStandardItemModel()
+        try:
+            debts = load_debt_data(username)
+            for row in debts:
+                items = [QStandardItem(cell) for cell in row]
+                debt_model.appendRow(items)
+## need to adjust in ui? not public need to set up same as transaction            self.dashboard.debt_tableWidget.setModel(debt_model)
+  
+
+        except FileNotFoundError:
+            QMessageBox.warning(self, "Missing File", f"Could not find debt file")
     def create_chart(self, title, data_dict):
         series = QPieSeries()
         for label, value in data_dict.items():
@@ -330,8 +343,13 @@ class MainDashBoard(QMainWindow):
             tab = self.dashboard.tracking_tabWidget.widget(i)
             if tab.layout() is None or tab.layout().isEmpty():
                 self.dashboard.tracking_tabWidget.removeTab(i)
-
-    
+    def add_expense(self):
+        data = [self.dashboard.add_expense_button]
+        with open("data/userlist.csv", 'w', newline='') as csvfile:
+            csv_data = ['date', 'card', 'type', 'amount']
+            writer = csv.DictWriter(csvfile, fieldnames=csv_data)
+            writer.writeheader()
+            writer.writerows(data)
     def logout(self):
         self.close()
 
