@@ -285,6 +285,13 @@ class MainDashBoard(QMainWindow):
         self.dashboard.welcome_label.setText(f"Welcome, {username}")
         self.load_widgets(username)   
         self.show_charts(username)
+        percentage = getTotalSavingsProgress(username)
+        if percentage is not None:
+            percentage = int(progress)
+        else:
+            percentage = 0  # or some fallback value
+        self.dashboard.debt_progressBar.setValue(percentage)
+
         #self.populate_accounts_from_purchases(self.dashboard.expense_comboBox, )
         #self.dashboard.add_expense_button.clicked.connect(self.add_expense(username))
 
