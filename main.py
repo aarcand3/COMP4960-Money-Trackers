@@ -57,58 +57,6 @@ def importUser(userid):
         usertotals[3] = totalincome
     # Calculate Networth by subtraacting totaldebt from totalbalence
     usertotals[0] = totalbalence - totaldebt
-def addExpense(userid):
-    # Manually input expenses to purchaces.csv
-    filepath = f"data/{userid}/purchaces.csv"
-
-    # Makes sure the path is a valid path that exists
-    os.makedirs(os.path.dirname(filepath), exist_ok=True)
-    
-    # User Inputs Information Here
-    print("\n=== Add New Expense ===")
-    date = input("Enter date (MM/DD/YY): ").strip()
-    card = input("Enter card used (e.g., Amex, Visa): ").strip()
-    category = input("Enter expense type (e.g., Food, Taxi, Electronics): ").strip()
-    try:
-        amount = float(input("Enter amount: ").strip())
-    except ValueError:
-        print("Invalid amount. Please enter a numeric value.")
-        return
-    
-    # Creates a dictionary to allow for appending.
-    expense_entry = {
-        "date": date,
-        "card": card,
-        "type": category,
-        "amount": amount
-    }
-
-    # Creates dataframe
-    df = pd.DataFrame([expense_entry])
-
-    # Appends to csv file if it exists, creates one if it doesn't.
-    file_exists = os.path.exists(filepath)
-    if file_exists:
-        try:
-            df_existing = pd.read_csv(filepath)
-
-            # Ensures columns are consistent
-            if not all(col in df_existing.columns for col in df.columns):
-                print("Warning: Column mismatch detected. Adjusting...")
-                for col in df.columns:
-                    if col not in df_existing.columns:
-                        df_existing[col] = None
-                df_existing = df_existing[df.columns]
-
-            df.to_csv(filepath, mode="a", header=False, index=False)
-        except Exception as e:
-            print(f"Error appending to existing CSV: {e}")
-    else:
-        df.to_csv(filepath, mode="w", index=False)
-
-
-    
-    print(f"Expense successfully added for user '{userid}'\n")
 
 def logthis(logname):
     # 
@@ -231,14 +179,15 @@ class LoginWindow (QMainWindow):
                     self.close()
                     return
             QMessageBox.warning(self, "Login Failed", "Invalid username or password.")
-            
+
+
+
 class MainDashBoard(QMainWindow):
     def __init__(self):
         super().__init__()
         self.dashboard = Ui_MainWindow()
         self.dashboard.setupUi(self)
         self.dashboard.logoutButton.clicked.connect(self.logout)
-        self.dashboard.add_expense_button.clicked.connect(self.add_expense)
         self.setStyleSheet(f"""
         QWidget {{
             background-color:  #D8E4DC;  /* Light sage green */;
@@ -261,6 +210,73 @@ class MainDashBoard(QMainWindow):
         self.dashboard.welcome_label.setText(f"Welcome, {username}")
         self.load_widgets(username)   
         self.show_charts(username)
+        #self.populate_accounts_from_purchases(self.dashboard.expense_comboBox, )
+        #self.dashboard.add_expense_button.clicked.connect(self.add_expense(username))
+
+    #def populate_accounts_from_purchases(combo_box: QComboBox, username):
+    #    combo_box.clear()
+    #    filepath = "data/{username}/purchases.csv"
+    #    seen_cards = set()
+    #    try:
+    #        with open(filepath, newline='') as csvfile:
+    #            reader = csv.DictReader(csvfile)
+    #            for row in reader:
+    #                card = row.get("card")
+    #                if card and card not in seen_cards:
+    #                    combo_box.addItem(card)
+    #                seen_cards.add(card)
+    #    except FileNotFoundError:
+    #        combo_box.addItem("No purchases file found")
+
+    def addExpense(self, userid):
+    # Manually input expenses to purchaces.csv
+        filepath = f"data/{userid}/purchases.csv"
+
+    # Makes sure the path is a valid path that exists
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+    
+        date = self.dashboard.expense_dateEdit.text().strip()
+        card = self.dashboard.expense_comboBox.currentText().strip()
+        category = self.dashboard.type_lineEdit.text().strip()
+        try:
+            amount = self.dashboard.ammount_edit.text().strip()
+        except ValueError:
+            print("Invalid amount. Please enter a numeric value.")
+            return
+    
+    # Creates a dictionary to allow for appending.
+        expense_entry = {
+            "date": date,
+            "card": card,
+            "type": category,
+            "amount": amount
+        }
+    
+    # Creates dataframe
+        df = pd.DataFrame([expense_entry])
+
+    # Appends to csv file if it exists, creates one if it doesn't.
+        file_exists = os.path.exists(filepath)
+        if file_exists:
+            try:
+                df_existing = pd.read_csv(filepath)
+
+                # Ensures columns are consistent
+                if not all(col in df_existing.columns for col in df.columns):
+                    print("Warning: Column mismatch detected. Adjusting...")
+                    for col in df.columns:
+                        if col not in df_existing.columns:
+                            df_existing[col] = None
+                    df_existing = df_existing[df.columns]
+
+                df.to_csv(filepath, mode="a", header=False, index=False)
+            except Exception as e:
+                print(f"Error appending to existing CSV: {e}")
+        else:
+            df.to_csv(filepath, mode="w", index=False)
+
+
+
     def load_widgets(self, username):
         model = QStandardItemModel()
         try:
@@ -344,8 +360,8 @@ class MainDashBoard(QMainWindow):
             if tab.layout() is None or tab.layout().isEmpty():
                 self.dashboard.tracking_tabWidget.removeTab(i)
     def add_expense(self):
-        data = [self.dashboard.add_expense_button]
-        with open("data/userlist.csv", 'w', newline='') as csvfile:
+        data = [self.dashboard.expense_dateEdit, self.dashboard.expense_comboBox, ]
+        with open("data/purchases.csv", 'a', newline='') as csvfile:
             csv_data = ['date', 'card', 'type', 'amount']
             writer = csv.DictWriter(csvfile, fieldnames=csv_data)
             writer.writeheader()
