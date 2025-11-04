@@ -285,30 +285,64 @@ class MainDashBoard(QMainWindow):
         self.dashboard.welcome_label.setText(f"Welcome, {username}")
         self.load_widgets(username)   
         self.show_charts(username)
-        percentage = getTotalSavingsProgress(username)
-        if percentage is not None:
-            percentage = int(progress)
-        else:
-            percentage = 0  # or some fallback value
-        self.dashboard.debt_progressBar.setValue(percentage)
+        self.update_progress(username)
+        self.dashboard.update_pushButton.clicked.connect(lambda: self.update_progress(username))
+        self.populate_accounts_from_purchases(self.dashboard.expense_comboBox, username )
+        self.dashboard.userchoice_comboBox.currentIndexChanged.connect(self.on_dropdown_change)
 
-        #self.populate_accounts_from_purchases(self.dashboard.expense_comboBox, )
         #self.dashboard.add_expense_button.clicked.connect(self.add_expense(username))
 
-    #def populate_accounts_from_purchases(combo_box: QComboBox, username):
-    #    combo_box.clear()
-    #    filepath = "data/{username}/purchases.csv"
-    #    seen_cards = set()
-    #    try:
-    #        with open(filepath, newline='') as csvfile:
-    #            reader = csv.DictReader(csvfile)
-    #            for row in reader:
-    #                card = row.get("card")
-    #                if card and card not in seen_cards:
-    #                    combo_box.addItem(card)
-    #                seen_cards.add(card)
-    #    except FileNotFoundError:
-    #        combo_box.addItem("No purchases file found")
+    def update_progress (self, username):
+        percentage = getTotalSavingsProgress(username)
+        if percentage is not None:
+            percentage = int(percentage)
+        else:
+            percentage = 0 
+        self.dashboard.debt_progressBar.setValue(percentage)
+    def populate_accounts_from_purchases(self, combo_box: QComboBox, username):
+        combo_box.clear()
+        filepath = "data/{username}/purchases.csv"
+        seen_cards = set()
+        try:
+            with open(filepath, newline='') as csvfile:
+                reader = csv.DictReader(csvfile)
+                for row in reader:
+                    card = row.get("card")
+                    if card and card not in seen_cards:
+                        combo_box.addItem(card)
+                    seen_cards.add(card)
+        except FileNotFoundError:
+            combo_box.addItem("No purchases file found")
+
+    def on_dropdown_change(self, index):
+        for widget in self.dashboard.csv_group:
+                widget.hide()
+        for widget in self.dashboard.expense_group:
+                widget.hide()
+        for widget in self.dashboard.add_account_group:
+                widget.hide()
+        for widget in self.dashboard.savings_group:
+                widget.hide()
+
+        if index == 0:
+            for widget in self.dashboard.csv_group:
+                widget.hide()
+            for widget in self.dashboard.expense_group:
+                widget.hide()
+        elif index == 1:
+            for widget in self.dashboard.csv_group:
+                widget.show()
+        elif index == 2:
+            for widget in self.dashboard.add_account_group:
+                widget.hide()#replace with add account ?
+        elif index == 3:
+            for widget in self.dashboard.expense_group:
+                widget.show()
+        elif index == 4:
+            for widget in self.dashboard.savings_group:
+                widget.hide()    # need to replace for whatever we choose to add a savings goal?
+        self.dashboard.expense_comboBox.currentIndexChanged.connect(self.on_dropdown_change)
+
 
     def addExpense(self, userid):
     # Manually input expenses to purchaces.csv

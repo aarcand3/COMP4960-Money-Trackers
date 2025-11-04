@@ -117,7 +117,10 @@ class Ui_MainWindow(object):
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
         self.menubar.addAction(self.menuMoneyTracker.menuAction())
-
+        self.csv_group = {self.frame, self.pushButton}
+        self.expense_group = {self.ammount_edit, self.ammount_label, self.account_label, self.date_label, self.expense_dateEdit, self.add_expense_button, self.type_lineEdit, self.type_label, self.expense_comboBox}
+        self.savings_group = {self.ammount_edit, self.ammount_label, self.date_label, self.expense_dateEdit, self.add_expense_button}
+        self.add_account_group = {self.account_label, self.expense_comboBox, self.add_expense_button}
         self.retranslateUi(MainWindow)
         self.tracking_tabWidget.setCurrentIndex(1)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
