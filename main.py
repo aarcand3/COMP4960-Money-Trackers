@@ -206,64 +206,7 @@ def getTotalSavingsProgress(userid):
 
     total_progress = round((total_balance / total_goal_amount) * 100, 2)
     return total_progress
-#imports a csv from an application (Excel for now)
-def import_csv_from_app(userid, target_name, file_path):
-    try:
-        #Makes sure there is a folder for user
-        user_folder = os.path.join("data", userid)
-        os.makedirs(user_folder, exist_ok=True)
-
-        #Checks for output file    
-        output_path = os.path.join(user_folder, f"{target_name}.csv")
-        
-        #Reads CSV
-        try:
-            df = pd.read_csv(file_path, encoding='utf-8')
-        except UnicodeDecodeError:
-            df = pd.read_csv(file_path, encoding='latin1')
-        except pd.errors.ParserError:
-            #Checks for Excel (which can use semicolons)
-            df = pd.read_csv(file_path, sep=';')
-        #Clean up column names
-        df.columns = [col.strip().lower() for col in df.columns]
-
-        #Normalize column names
-        rename_map = {
-            'date': 'date',
-            'card': 'card',
-            'type': 'type',
-            'category': 'type',
-            'amount': 'amount',
-            'balance': 'balance',
-            'interest': 'interest'
-        }
-        df.rename(columns={col: rename_map.get(col, col) for col in df.columns}, inplace=True)
-
-        #Write/Append to existing file
-        file_exists = os.path.exists(output_path)
-        if file_exists:
-            existing = pd.read_csv(output_path)
-            # Align columns and concatenate
-            combined = pd.concat([existing, df], ignore_index=True)
-            combined.to_csv(output_path, index=False)
-            rows_added = len(df)
-        else:
-            df.to_csv(output_path, index=False)
-            rows_added = len(df)
-
-        return {
-            'status': 'success',
-            'rows_imported': rows_added,
-            'message': f"Imported {rows_added} rows into {target_name}.csv"
-        }
-
-    
-    except Exception as e:
-        return {
-            'status': 'error',
-            'rows_imported': 0,
-            'message': f"⚠️ Import failed: {str(e)}"
-        }
+#
 # login window and validation
 class LoginWindow (QMainWindow):
     def __init__(self):
@@ -365,6 +308,34 @@ class MainDashBoard(QMainWindow):
     #                seen_cards.add(card)
     #    except FileNotFoundError:
     #        combo_box.addItem("No purchases file found")
+    def on_dropdown_change(self, index):
+        for widget in self.dashboard.csv_group:
+                widget.hide()
+        for widget in self.dashboard.expense_group:
+                widget.hide()
+        for widget in self.dashboard.add_account_group:
+                widget.hide()
+        for widget in self.dashboard.savings_group:
+                widget.hide()
+
+        if index == 0:
+            for widget in self.dashboard.csv_group:
+                widget.hide()
+            for widget in self.dashboard.expense_group:
+                widget.hide()
+        elif index == 1:
+            for widget in self.dashboard.csv_group:
+                widget.show()
+        elif index == 2:
+            for widget in self.dashboard.add_account_group:
+                widget.hide()#replace with add account ?
+        elif index == 3:
+            for widget in self.dashboard.expense_group:
+                widget.show()
+        elif index == 4:
+            for widget in self.dashboard.savings_group:
+                widget.hide()    # need to replace for whatever we choose to add a savings goal?
+        self.dashboard.expense_comboBox.currentIndexChanged.connect(self.on_dropdown_change)
 
     def addExpense(self, userid):
     # Manually input expenses to purchaces.csv
@@ -413,7 +384,64 @@ class MainDashBoard(QMainWindow):
         else:
             df.to_csv(filepath, mode="w", index=False)
 
+#imports a csv from an application (Excel for now)
+    def import_csv_from_app(self, userid, target_name, file_path):
+        try:
+            #Makes sure there is a folder for user
+            user_folder = os.path.join("data", userid)
+            os.makedirs(user_folder, exist_ok=True)
 
+            #Checks for output file    
+            output_path = os.path.join(user_folder, f"{target_name}.csv")
+
+            #Reads CSV
+            try:
+                df = pd.read_csv(file_path, encoding='utf-8')
+            except UnicodeDecodeError:
+                df = pd.read_csv(file_path, encoding='latin1')
+            except pd.errors.ParserError:
+            #Checks for Excel (which can use semicolons)
+                df = pd.read_csv(file_path, sep=';')
+            #Clean up column names
+            df.columns = [col.strip().lower() for col in df.columns]
+
+        #Normalize column names
+            rename_map = {
+               'date': 'date',
+                'card': 'card',
+                'type': 'type',
+                'category': 'type',
+                'amount': 'amount',
+                'balance': 'balance',
+                'interest': 'interest'
+            }
+            df.rename(columns={col: rename_map.get(col, col) for col in df.columns}, inplace=True)
+
+            #Write/Append to existing file
+            file_exists = os.path.exists(output_path)
+            if file_exists:
+                existing = pd.read_csv(output_path)
+                # Align columns and concatenate
+                combined = pd.concat([existing, df], ignore_index=True)
+                combined.to_csv(output_path, index=False)
+                rows_added = len(df)
+            else:
+               df.to_csv(output_path, index=False)
+               rows_added = len(df)
+
+            return {
+                'status': 'success',
+                'rows_imported': rows_added,
+                'message': f"Imported {rows_added} rows into {target_name}.csv"
+            }
+
+    
+        except Exception as e:
+            return {
+               'status': 'error',
+                'rows_imported': 0,
+                'message': f"⚠️ Import failed: {str(e)}"
+            }
 
     def load_widgets(self, username):
         model = QStandardItemModel()
@@ -514,3 +542,5 @@ if __name__ == "__main__":
     window = LoginWindow()
     window.show()
     sys.exit(app.exec_())
+
+    
