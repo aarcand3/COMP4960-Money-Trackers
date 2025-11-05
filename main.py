@@ -214,7 +214,7 @@ class LoginWindow (QMainWindow):
         self.ui = Ui_LoginWindow()
         self.ui.setupUi(self)
         self.ui.login_button.clicked.connect(self.check_login)
-        self.ui.create_button.clicked.connect(self.create_user)
+        self.ui.createaccount_button.clicked.connect(self.create_user)
     def create_user(self):
         userdata[0] = self.ui.user_box.text()
         userdata[1] = self.ui.pw_box.text()

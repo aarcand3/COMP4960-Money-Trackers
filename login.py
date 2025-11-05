@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'C:\Users\allis\OneDrive\Documents\GitHub\COMP4960-Money-Trackers\login.ui'
+# Form implementation generated from reading ui file 'loginpage.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.11
 #
@@ -10,33 +10,76 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+
 class Ui_LoginWindow(object):
-    def __init__(self):
-        super().__init__()
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("LoginWindow")
         MainWindow.resize(1323, 771)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
-        self.login_button = QtWidgets.QPushButton(self.centralwidget)
-        self.login_button.setGeometry(QtCore.QRect(190, 270, 90, 29))
-        self.login_button.setObjectName("login_button")
-        self.create_button = QtWidgets.QPushButton(self.centralwidget)
-        self.create_button.setGeometry(QtCore.QRect(300, 270, 111, 29))
-        self.create_button.setObjectName("create_button")
-        self.pw_box = QtWidgets.QLineEdit(self.centralwidget)
-        self.pw_box.setGeometry(QtCore.QRect(200, 220, 201, 28))
-        self.pw_box.setObjectName("pw_input")
-        self.pw_box.setEchoMode(QtWidgets.QLineEdit.Password) #Finally hides password
-        self.pass_label = QtWidgets.QLabel(self.centralwidget)
-        self.pass_label.setGeometry(QtCore.QRect(200, 200, 81, 20))
-        self.pass_label.setObjectName("pass_label")
-        self.User_label = QtWidgets.QLabel(self.centralwidget)
-        self.User_label.setGeometry(QtCore.QRect(200, 140, 81, 20))
+        self.createAccountBox = QtWidgets.QGroupBox(self.centralwidget)
+        self.createAccountBox.setGeometry(QtCore.QRect(70, 300, 421, 411))
+        self.createAccountBox.setObjectName("createAccountBox")
+        self.lastnameEdit = QtWidgets.QLineEdit(self.createAccountBox)
+        self.lastnameEdit.setGeometry(QtCore.QRect(210, 50, 191, 31))
+        self.lastnameEdit.setObjectName("lastnameEdit")
+        self.firstnameEdit = QtWidgets.QLineEdit(self.createAccountBox)
+        self.firstnameEdit.setGeometry(QtCore.QRect(20, 50, 181, 31))
+        self.firstnameEdit.setObjectName("firstnameEdit")
+        self.firstnameLabel = QtWidgets.QLabel(self.createAccountBox)
+        self.firstnameLabel.setGeometry(QtCore.QRect(20, 30, 101, 20))
+        self.firstnameLabel.setObjectName("firstnameLabel")
+        self.lastnameLabel = QtWidgets.QLabel(self.createAccountBox)
+        self.lastnameLabel.setGeometry(QtCore.QRect(210, 30, 91, 20))
+        self.lastnameLabel.setObjectName("lastnameLabel")
+        self.usernameEdit = QtWidgets.QLineEdit(self.createAccountBox)
+        self.usernameEdit.setGeometry(QtCore.QRect(20, 110, 211, 31))
+        self.usernameEdit.setObjectName("usernameEdit")
+        self.usernamelabel = QtWidgets.QLabel(self.createAccountBox)
+        self.usernamelabel.setGeometry(QtCore.QRect(20, 90, 91, 20))
+        self.usernamelabel.setObjectName("usernamelabel")
+        self.passwordEdit = QtWidgets.QLineEdit(self.createAccountBox)
+        self.passwordEdit.setGeometry(QtCore.QRect(20, 170, 211, 28))
+        self.passwordEdit.setEchoMode(QtWidgets.QLineEdit.Password) #hides password
+        self.passwordEdit.setObjectName("passwordEdit")
+        self.passwordLabel = QtWidgets.QLabel(self.createAccountBox)
+        self.passwordLabel.setGeometry(QtCore.QRect(20, 150, 91, 20))
+        self.passwordLabel.setObjectName("passwordLabe")
+        self.confirmEdit = QtWidgets.QLineEdit(self.createAccountBox)
+        self.confirmEdit.setGeometry(QtCore.QRect(20, 220, 211, 28))
+        self.confirmEdit.setObjectName("confirmEdit")
+        self.confirmEdit.setEchoMode(QtWidgets.QLineEdit.Password) #hides password
+        self.confirmLabel = QtWidgets.QLabel(self.createAccountBox)
+        self.confirmLabel.setGeometry(QtCore.QRect(20, 200, 141, 20))
+        self.confirmLabel.setObjectName("confirmLabel")
+        self.createaccount_button = QtWidgets.QPushButton(self.createAccountBox)
+        self.createaccount_button.setGeometry(QtCore.QRect(150, 290, 111, 29))
+        self.createaccount_button.setObjectName("createaccount_button")
+        self.welcomeLabel = QtWidgets.QLabel(self.centralwidget)
+        self.welcomeLabel.setGeometry(QtCore.QRect(140, -10, 301, 71))
+        self.welcomeLabel.setObjectName("welcomeLabel")
+        self.orlabel = QtWidgets.QLabel(self.centralwidget)
+        self.orlabel.setGeometry(QtCore.QRect(240, 270, 63, 20))
+        self.orlabel.setObjectName("or")
+        self.groupBox = QtWidgets.QGroupBox(self.centralwidget)
+        self.groupBox.setGeometry(QtCore.QRect(130, 50, 241, 211))
+        self.groupBox.setObjectName("groupBox")
+        self.User_label = QtWidgets.QLabel(self.groupBox)
+        self.User_label.setGeometry(QtCore.QRect(20, 40, 81, 20))
         self.User_label.setObjectName("User_label")
-        self.user_box = QtWidgets.QLineEdit(self.centralwidget)
-        self.user_box.setGeometry(QtCore.QRect(200, 170, 201, 28))
-        self.user_box.setObjectName("user_input")
+        self.user_box = QtWidgets.QLineEdit(self.groupBox)
+        self.user_box.setGeometry(QtCore.QRect(20, 60, 201, 28))
+        self.user_box.setObjectName("user_box")
+        self.pass_label = QtWidgets.QLabel(self.groupBox)
+        self.pass_label.setGeometry(QtCore.QRect(20, 110, 81, 20))
+        self.pass_label.setObjectName("pass_label")
+        self.pw_box = QtWidgets.QLineEdit(self.groupBox)
+        self.pw_box.setGeometry(QtCore.QRect(20, 130, 201, 28))
+        self.pw_box.setObjectName("pw_box")
+        self.pw_box.setEchoMode(QtWidgets.QLineEdit.Password) #Finally hides password
+        self.login_button = QtWidgets.QPushButton(self.groupBox)
+        self.login_button.setGeometry(QtCore.QRect(80, 170, 90, 29))
+        self.login_button.setObjectName("login_button")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1323, 25))
@@ -54,15 +97,22 @@ class Ui_LoginWindow(object):
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
-    def check_login(self):
-        #show second ui here or in main?
-        self.close()
+
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
-        self.login_button.setText(_translate("MainWindow", "Login"))
-        self.create_button.setText(_translate("MainWindow", "Create Account"))
-        self.pass_label.setText(_translate("MainWindow", "Password:"))
+        self.createAccountBox.setTitle(_translate("MainWindow", "Create Account"))
+        self.firstnameLabel.setText(_translate("MainWindow", "First Name"))
+        self.lastnameLabel.setText(_translate("MainWindow", "Last Name"))
+        self.usernamelabel.setText(_translate("MainWindow", "Username"))
+        self.passwordLabel.setText(_translate("MainWindow", "Password"))
+        self.confirmLabel.setText(_translate("MainWindow", "Confirm Password"))
+        self.createaccount_button.setText(_translate("MainWindow", "Create Account"))
+        self.welcomeLabel.setText(_translate("MainWindow", "Welcome to the Money Tracker!"))
+        self.orlabel.setText(_translate("MainWindow", "Or"))
+        self.groupBox.setTitle(_translate("MainWindow", "Login"))
         self.User_label.setText(_translate("MainWindow", "Username:"))
+        self.pass_label.setText(_translate("MainWindow", "Password:"))
+        self.login_button.setText(_translate("MainWindow", "Login"))
         self.menuMoney_Tracker.setTitle(_translate("MainWindow", "Money  Tracker "))
         self.menuLogin.setTitle(_translate("MainWindow", "Login"))
