@@ -126,8 +126,8 @@ def summarize_debt(debts):
             for d in debts:
                 d['monthly_interest'] = (d['balance'] * d['interest']) / 12 / 100
                 d['annual_interest'] = (d['balance'] * d['interest']) / 100
-            sorted_debts = sorted(debts, key=lambda x: x['interest'], reverse=True)
-            return total_debt, sorted_debts
+
+            return total_debt
 
 # function Save or update a savings goal for a specific user.
 def saveCategoryGoal(userid, category, amount, due_date):
