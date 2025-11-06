@@ -216,8 +216,8 @@ class LoginWindow (QMainWindow):
         self.ui.login_button.clicked.connect(self.check_login)
         self.ui.createaccount_button.clicked.connect(self.create_user)
     def create_user(self):
-        userdata[0] = self.ui.user_box.text()
-        userdata[1] = self.ui.pw_box.text()
+        userdata[0] = self.ui.usernameEdit.text()
+        userdata[1] = self.ui.passwordEdit.text()
     ##creating user
         with open("data/userlist.csv", mode="w") as data:
             csv_reader = csv.reader(data)
@@ -234,6 +234,7 @@ class LoginWindow (QMainWindow):
                 else:
                     QMessageBox.warning(self, "Cannot Create User.", "User already exists.")
                 
+
 
     def check_login(self):
         userdata[0] = self.ui.user_box.text()
@@ -262,6 +263,7 @@ class MainDashBoard(QMainWindow):
         self.dashboard = Ui_MainWindow()
         self.dashboard.setupUi(self)
         self.dashboard.logoutButton.clicked.connect(self.logout)
+        self.dashboard.userchoice_comboBox.currentIndexChanged.connect(self.on_dropdown_change)
         self.setStyleSheet(f"""
         QWidget {{
             background-color:  #D8E4DC;  /* Light sage green */;
@@ -284,11 +286,13 @@ class MainDashBoard(QMainWindow):
         self.dashboard.welcome_label.setText(f"Welcome, {username}")
         self.load_widgets(username)   
         self.show_charts(username)
+        self.on_dropdown_change(self.dashboard.userchoice_comboBox.currentIndex())
+
         percentage = getTotalSavingsProgress(username)
         if percentage is not None:
             percentage = int(percentage)
         else:
-            percentage = 0  # or some fallback value
+            percentage = 0  #fallback value
         self.dashboard.debt_progressBar.setValue(percentage)
 
         #self.populate_accounts_from_purchases(self.dashboard.expense_comboBox, )
@@ -463,8 +467,7 @@ class MainDashBoard(QMainWindow):
             for row in debts:
                 items = [QStandardItem(cell) for cell in row]
                 debt_model.appendRow(items)
-## need to adjust in ui? not public need to set up same as transaction            self.dashboard.debt_tableWidget.setModel(debt_model)
-  
+#need to adjust            self.dashboard.debt_tableView.setModel(debt_model)
 
         except FileNotFoundError:
             QMessageBox.warning(self, "Missing File", f"Could not find debt file")
