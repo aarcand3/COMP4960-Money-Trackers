@@ -1,5 +1,5 @@
 # Money Trackers - Team 1
-# Jack Donahue, Simon, Allison, Sonia
+# Jack Donahue, Simon Dean, Allison Arcand, Sonia Yahi
 
 # Library imports & Initial Values
 import csv
