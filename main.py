@@ -464,11 +464,11 @@ class MainDashBoard(QMainWindow):
         debt_model = QStandardItemModel()
         try:
             debts = load_debt_data(username)
+            
             for row in debts:
                 items = [QStandardItem(cell) for cell in row]
                 debt_model.appendRow(items)
-#need to adjust            self.dashboard.debt_tableView.setModel(debt_model)
-
+            self.dashboard.debt_tableView.setModel(debt_model)
         except FileNotFoundError:
             QMessageBox.warning(self, "Missing File", f"Could not find debt file")
     def create_chart(self, title, data_dict):
