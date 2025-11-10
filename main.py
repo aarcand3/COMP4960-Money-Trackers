@@ -216,32 +216,34 @@ class LoginWindow (QMainWindow):
         self.ui.login_button.clicked.connect(self.check_login)
         self.ui.createaccount_button.clicked.connect(self.create_user)
     def create_user(self):
-        userdata[0] = self.ui.usernameEdit.text()
-        userdata[1] = self.ui.passwordEdit.text()
     ##creating user
-        username = self.ui.usernameEdit.text()
-        firstname = self.ui.firstnameEdit.text()
-        lastname = self.ui.lastnameEdit.text()
-        if self.ui.passwordEdit.text() == self.ui.confirmEdit.text():
-            password = self.ui.passwordEdit.text()
-        else:
-            QMessageBox.warning(self, "Invalid: Passwords do not match.")
-        
-        with open("data/userlist.csv", mode="w") as data:
+        username = self.ui.usernameEdit.text().strip()
+        firstname = self.ui.firstnameEdit.text().strip()
+        lastname = self.ui.lastnameEdit.text().strip()
+        password = self.ui.passwordEdit.text().strip()
+        confirm = self.ui.confirmEdit.text().strip()
+
+        if password != confirm:
+            QMessageBox.warning(self, "Invalid", "Passwords do not match.")
+            return
+
+        userdata = [username, password, firstname, lastname,]
+
+        with open("data/userlist.csv", mode="r") as data:
             csv_reader = csv.reader(data)
             for row in csv_reader:
-                if row[0] != userdata[0] and row[0] == None:
-                    userdata[0] = row[0]
-                    userdata[1] = row[1]
-                    logthis("login.log")
-                    self.dashboard_window = MainDashBoard()
-                    self.dashboard_window.logged_in(userdata[0])
-                    self.dashboard_window.show()
-                    self.close()
+                if row[0] == username:
+                    QMessageBox.warning(self, "Cannot Create User.", "User already exists.")
                     return
                 else:
-                    QMessageBox.warning(self, "Cannot Create User.", "User already exists.")
-                
+                    with open("data/userlist.csv", mode = "a", newline='') as file:
+                        writer = csv.writer(file)
+                        writer.writerow(userdata)
+                    logthis("login.log")
+                    self.dashboard_window= MainDashBoard()
+                    self.dashboard_window.logged_in(username)
+                    self.dashboard_window.show()
+                    self.close()
 
 
     def check_login(self):
