@@ -219,6 +219,14 @@ class LoginWindow (QMainWindow):
         userdata[0] = self.ui.usernameEdit.text()
         userdata[1] = self.ui.passwordEdit.text()
     ##creating user
+        username = self.ui.usernameEdit.text()
+        firstname = self.ui.firstnameEdit.text()
+        lastname = self.ui.lastnameEdit.text()
+        if self.ui.passwordEdit.text() == self.ui.confirmEdit.text():
+            password = self.ui.passwordEdit.text()
+        else:
+            QMessageBox.warning(self, "Invalid: Passwords do not match.")
+        
         with open("data/userlist.csv", mode="w") as data:
             csv_reader = csv.reader(data)
             for row in csv_reader:
@@ -264,7 +272,7 @@ class MainDashBoard(QMainWindow):
         self.dashboard.setupUi(self)
         self.dashboard.logoutButton.clicked.connect(self.logout)
         self.dashboard.userchoice_comboBox.currentIndexChanged.connect(self.on_dropdown_change)
-        self.dashboard.frame.setAcceptDrops()
+        self.dashboard.frame.setAcceptDrops(True)
         self.setStyleSheet(f"""
         QWidget {{
             background-color:  #D8E4DC;  /* Light sage green */;
@@ -324,8 +332,6 @@ class MainDashBoard(QMainWindow):
                 widget.hide()
 
         if index == 0:
-            for widget in self.dashboard.csv_group:
-                widget.hide()
             for widget in self.dashboard.expense_group:
                 widget.hide()
         elif index == 1:
