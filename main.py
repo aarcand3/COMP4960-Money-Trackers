@@ -264,6 +264,7 @@ class MainDashBoard(QMainWindow):
         self.dashboard.setupUi(self)
         self.dashboard.logoutButton.clicked.connect(self.logout)
         self.dashboard.userchoice_comboBox.currentIndexChanged.connect(self.on_dropdown_change)
+        self.dashboard.frame.setAcceptDrops()
         self.setStyleSheet(f"""
         QWidget {{
             background-color:  #D8E4DC;  /* Light sage green */;
@@ -464,7 +465,7 @@ class MainDashBoard(QMainWindow):
         debt_model = QStandardItemModel()
         try:
             debts = load_debt_data(username)
-            
+
             for row in debts:
                 items = [QStandardItem(cell) for cell in row]
                 debt_model.appendRow(items)
