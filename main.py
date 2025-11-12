@@ -471,15 +471,13 @@ class MainDashBoard(QMainWindow):
             QMessageBox.warning(self,"Missing File", f"Could not find file for {username}")
 
         debt_model = QStandardItemModel()
-        try:
-            debts = load_debt_data(username)
-
-            for row in debts:
-                items = [QStandardItem(cell) for cell in row]
-                debt_model.appendRow(items)
-            self.dashboard.debt_tableView.setModel(debt_model)
-        except FileNotFoundError:
-            QMessageBox.warning(self, "Missing File", f"Could not find debt file")
+#       try:      get debt to show single line not summary? or maybe summarize debt and savings in one file?
+#            debt = load_debt_data(username)
+#           debt_summary = summarize_debt(debt)
+#            for debt_summary:
+#            self.dashboard.debt_tableView.setModel(debt_model)
+#        except FileNotFoundError:
+#            QMessageBox.warning(self, "Missing File", f"Could not find debt file")
     def create_chart(self, title, data_dict):
         series = QPieSeries()
         for label, value in data_dict.items():

@@ -332,6 +332,20 @@
     </property>
    </widget>
   </widget>
+  <widget class="QPushButton" name="chatButton">
+    <property name="geometry">
+     <rect>
+      <x>420</x>
+      <y>640</y>
+      <width>90</width>
+      <height>29</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>ChatBot</string>
+    </property>
+   </widget>
+  </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>

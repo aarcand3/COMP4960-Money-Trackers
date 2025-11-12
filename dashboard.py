@@ -120,6 +120,9 @@ class Ui_MainWindow(object):
         self.savings_group = {self.ammount_edit, self.ammount_label, self.date_label, self.expense_dateEdit, self.add_expense_button}
         self.add_account_group = {self.account_label, self.expense_comboBox, self.add_expense_button}
         self.retranslateUi(MainWindow)
+        self.chatButton = QtWidgets.QMenuBar(MainWindow)
+        self.chatButton.setObjectName("chatButton")
+        self.chatButton.setGeometry(420,640,90,29)
         self.tracking_tabWidget.setCurrentIndex(1)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
