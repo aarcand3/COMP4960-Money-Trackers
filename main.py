@@ -184,7 +184,6 @@ def getAllGoalsWithProgress(userid):
 
     return enriched_goals
 
-#Returns total savings progress across all goals
 def getTotalSavingsProgress(userid):
     accounts_path = f"data/{userid}/accounts.csv"
     goals_path = f"data/{userid}/goals.csv"
@@ -207,7 +206,8 @@ def getTotalSavingsProgress(userid):
 
     total_progress = round((total_balance / total_goal_amount) * 100, 2)
     return total_progress
-#
+
+
 # login window and validation
 class LoginWindow (QMainWindow):
     def __init__(self):
@@ -267,7 +267,13 @@ class LoginWindow (QMainWindow):
                     self.close()
                     return
             QMessageBox.warning(self, "Login Failed", "Invalid username or password.")
-            
+class ChatBox(QDialog) :
+    def __init__(self):
+        super().__init__()
+        self.chatBox = Ui_Chat()
+        self.chatBox.setupUi(self)   
+ 
+ 
 class MainDashBoard(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -301,7 +307,7 @@ class MainDashBoard(QMainWindow):
         self.show_charts(username)
         self.on_dropdown_change(self.dashboard.userchoice_comboBox.currentIndex())
 
-        percentage = getTotalSavingsProgress(username)
+        percentage = 0 #  getTotalSavingsProgress(username)
         if percentage is not None:
             percentage = int(percentage)
         else:
@@ -311,7 +317,7 @@ class MainDashBoard(QMainWindow):
         #self.populate_accounts_from_purchases(self.dashboard.expense_comboBox, )
         #self.dashboard.add_expense_button.clicked.connect(self.add_expense(username))
     def showChat (self):
-        self.chat = Ui_Chat
+        self.chat = ChatBox()
         self.chat.show()
 
     #def populate_accounts_from_purchases(combo_box: QComboBox, username):
