@@ -22,6 +22,7 @@ while True:
         "think": False,
         "options": {},
         "stream": False,
+        "keep_alive":"5m",
     }
 
     headers = {
