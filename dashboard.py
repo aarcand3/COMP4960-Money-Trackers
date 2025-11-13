@@ -98,6 +98,9 @@ class Ui_MainWindow(object):
         self.type_label = QtWidgets.QLabel(self.centralwidget)
         self.type_label.setGeometry(30,220,63,20)
         self.type_label.setObjectName("type_label")
+        self.chatButton = QtWidgets.QPushButton(MainWindow)
+        self.chatButton.setGeometry(420,640,90,29)
+        self.chatButton.setObjectName("chatButton")
         self.account_label = QtWidgets.QLabel(self.centralwidget)
         self.account_label.setGeometry(160,220,63,20)
         self.account_label.setObjectName("account_label")
@@ -120,9 +123,7 @@ class Ui_MainWindow(object):
         self.savings_group = {self.ammount_edit, self.ammount_label, self.date_label, self.expense_dateEdit, self.add_expense_button}
         self.add_account_group = {self.account_label, self.expense_comboBox, self.add_expense_button}
         self.retranslateUi(MainWindow)
-        self.chatButton = QtWidgets.QMenuBar(MainWindow)
-        self.chatButton.setObjectName("chatButton")
-        self.chatButton.setGeometry(420,640,90,29)
+
         self.tracking_tabWidget.setCurrentIndex(1)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
@@ -135,7 +136,8 @@ class Ui_MainWindow(object):
         self.userchoice_comboBox.setItemText(2, _translate("MainWindow", "Add New Account"))
         self.userchoice_comboBox.setItemText(3, _translate("MainWindow", "Manually Input a Transaction"))
         self.userchoice_comboBox.setItemText(4, _translate("MainWindow", "Add New Savings Goal"))
-        self.update_pushButton.setText(_translate("MainWindow", "update"))
+        self.update_pushButton.setText(_translate("MainWindow", "Update"))
+        self.chatButton.setText(_translate("MainWindow", "Chat"))
         self.add_expense_button.setText(_translate("MainWindow","Add Expense"))
         self.transaction_label.setText(_translate("MainWindow", "Recent Transactions:"))
         self.tracking_tabWidget.setTabText(self.tracking_tabWidget.indexOf(self.income_tab), _translate("MainWindow", "Tab 1"))

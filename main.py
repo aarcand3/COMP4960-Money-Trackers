@@ -13,6 +13,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import *
 from login import Ui_LoginWindow
 from dashboard import Ui_MainWindow
+from chatbox import Ui_Dialog as Ui_Chat
 from datetime import datetime
 import sys
 import os
@@ -274,6 +275,7 @@ class MainDashBoard(QMainWindow):
         self.dashboard.setupUi(self)
         self.dashboard.logoutButton.clicked.connect(self.logout)
         self.dashboard.userchoice_comboBox.currentIndexChanged.connect(self.on_dropdown_change)
+        self.dashboard.chatButton.clicked.connect(self.showChat)
         self.dashboard.frame.setAcceptDrops(True)
         self.setStyleSheet(f"""
         QWidget {{
@@ -308,6 +310,9 @@ class MainDashBoard(QMainWindow):
 
         #self.populate_accounts_from_purchases(self.dashboard.expense_comboBox, )
         #self.dashboard.add_expense_button.clicked.connect(self.add_expense(username))
+    def showChat (self):
+        self.chat = Ui_Chat
+        self.chat.show()
 
     #def populate_accounts_from_purchases(combo_box: QComboBox, username):
     #    combo_box.clear()
