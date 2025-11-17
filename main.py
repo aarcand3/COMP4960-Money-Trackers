@@ -241,11 +241,33 @@ class LoginWindow (QMainWindow):
                         writer = csv.writer(file)
                         writer.writerow(userdata)
                     logthis("login.log")
+                    self.createfiles(username)
                     self.dashboard_window= MainDashBoard()
                     self.dashboard_window.logged_in(username)
                     self.dashboard_window.show()
                     self.close()
 
+    def createfiles(self, username):
+        # Define the path for user data
+        base_path = os.path.join("data", "users", username)
+        os.makedirs(base_path, exist_ok=True)
+
+        purchases_file = os.path.join(base_path, "purchases.csv")
+        savings_file = os.path.join(base_path, "goals.csv")
+        accounts_file = os.path.join(base_path, "accounts.csv")
+
+    # Create each file Should we do more?
+        with open(purchases_file, mode="w", newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(["Date", "Card", "Type","Amount"])
+
+        with open(savings_file, mode="w", newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(["UserID", "Category", "Ammount", "Deadline"]) #check with sonia?
+
+        with open(accounts_file, mode="w", newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(["Date", "Bank", "Balance"])
 
     def check_login(self):
         userdata[0] = self.ui.user_box.text()
@@ -314,26 +336,27 @@ class MainDashBoard(QMainWindow):
             percentage = 0  #fallback value
         self.dashboard.debt_progressBar.setValue(percentage)
 
-        #self.populate_accounts_from_purchases(self.dashboard.expense_comboBox, )
+        self.populate_accounts_from_purchases(self.dashboard.expense_comboBox, username )
         #self.dashboard.add_expense_button.clicked.connect(self.add_expense(username))
     def showChat (self):
         self.chat = ChatBox()
         self.chat.show()
 
-    #def populate_accounts_from_purchases(combo_box: QComboBox, username):
-    #    combo_box.clear()
-    #    filepath = "data/{username}/purchases.csv"
-    #    seen_cards = set()
-    #    try:
-    #        with open(filepath, newline='') as csvfile:
-    #            reader = csv.DictReader(csvfile)
-    #            for row in reader:
-    #                card = row.get("card")
-    #                if card and card not in seen_cards:
-    #                    combo_box.addItem(card)
-    #                seen_cards.add(card)
-    #    except FileNotFoundError:
-    #        combo_box.addItem("No purchases file found")
+    def populate_accounts_from_purchases(self, combo_box: QComboBox, username):
+        combo_box.clear()
+        filepath = "data/{username}/purchases.csv"
+        seen_cards = set()
+        try:
+            with open(filepath, newline='') as csvfile:
+                reader = csv.DictReader(csvfile)
+                for row in reader:
+                    card = row.get("card")
+                    if card and card not in seen_cards:
+                        combo_box.addItem(card)
+                    seen_cards.add(card)
+        except FileNotFoundError:
+            combo_box.addItem("No purchases file found")
+
     def on_dropdown_change(self, index):
         for widget in self.dashboard.csv_group:
                 widget.hide()
@@ -358,7 +381,7 @@ class MainDashBoard(QMainWindow):
                 widget.show()
         elif index == 4:
             for widget in self.dashboard.savings_group:
-                widget.hide()    # need to replace for whatever we choose to add a savings goal?
+                widget.show()    
         self.dashboard.expense_comboBox.currentIndexChanged.connect(self.on_dropdown_change)
 
     def addExpense(self, userid):
@@ -371,8 +394,12 @@ class MainDashBoard(QMainWindow):
         date = self.dashboard.expense_dateEdit.text().strip()
         card = self.dashboard.expense_comboBox.currentText().strip()
         category = self.dashboard.type_lineEdit.text().strip()
-        try:
-            amount = self.dashboard.ammount_edit.text().strip()
+        amount = self.dashboard.ammount_edit.text().strip()
+        expensedata = [date, card, category, amount]
+        try:        
+            with open("data/userlist.csv", mode = "a", newline='') as file:
+                writer = csv.writer(file)
+                writer.writerow(expensedata)
         except ValueError:
             print("Invalid amount. Please enter a numeric value.")
             return
