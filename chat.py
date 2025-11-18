@@ -4,16 +4,12 @@ URL = 'http://jld.ddns.net:11434/api/chat'
 model = 'gemma3:12b'
 messages = []
 
-# Basic chat loop
 while True:
-
     user_input = input(">>> ")
-    
     message = {
         "role": "user",
         "content": user_input
     }
-    
     messages.append(message)
 
     payload = {
