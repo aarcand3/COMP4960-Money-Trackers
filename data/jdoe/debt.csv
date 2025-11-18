@@ -1,4 +1,6 @@
-Due date,card,interest,balance
-09/15/2025,Amex,10.00%,893.44
-09/22/25,Citi,15.00%,45
-09/19/25,Mortgage,4.30%,1100
+due_date,card,amount,interest
+2026-01-01,Emrgency,1100.0,4.3
+2026-01-01,Mortgage,1100.0,4.3
+2025-12-05,Amex,893.44,10.0
+2026-01-01,Car,1100.0,4.3
+2026-01-01,School,1100.0,4.3

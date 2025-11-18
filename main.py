@@ -96,28 +96,101 @@ def logthis(logname):
         print("ERROR! Could not find: "+logname+" is it configured?")
 
 
-#function reads a user's debt CSV file
-def load_debt_data(username):
-        csv_path = f"data/{username}/debt.csv"
-        debts = []
+#function to add new debt
+def add_new_debt(userid, card, amount, interest, due_date):
+
+        debt_path = f"data/{userid}/debt.csv"
+
+        # Normalize inputs
+        card = str(card).strip().title()
         try:
-            with open(csv_path, 'r') as file:
-                reader = csv.DictReader(file)
-                for row in reader:
-                    vendor = row['card'].strip()
-                    balance = float(row['balance'])
-                    interest_str = row['interest'].strip().replace('%', '')  # ✅ Strip %
-                    interest = float(interest_str)
-                    debts.append({
-                        'vendor': vendor,
-                        'balance': balance,
-                        'interest': interest
-                    })
-        except FileNotFoundError:
-            print(f"⚠️ Debt file not found for user: {username}")
-        except Exception as e:
-            print(f"⚠️ Error loading debt data for {username}: {e}")
-        return debts
+            amount = round(float(amount), 2)
+            interest_float = round(float(str(interest).replace('%', '')), 2)
+        except ValueError:
+            return  # skip invalid balance or interest
+
+        # Normalize due date inline
+        due_date = str(due_date).strip()
+        for fmt in ("%m/%d/%Y", "%m/%d/%y"):
+            try:
+                due_date = datetime.strptime(due_date, fmt).strftime("%Y-%m-%d")
+                break
+            except ValueError:
+                continue
+        else:
+            return  # skip invalid date
+
+        new_entry = {
+            "due_date": due_date,
+            "card": card,
+            "amount": amount,
+            "interest": interest_float
+        }
+
+        os.makedirs(os.path.dirname(debt_path), exist_ok=True)
+
+        # Load and normalize existing data
+        if os.path.exists(debt_path):
+            try:
+                df = pd.read_csv(debt_path)
+
+                df["card"] = df["card"].astype(str).str.strip().str.title()
+                df["amount"] = pd.to_numeric(df["amount"], errors="coerce").round(2)
+                df["interest"] = pd.to_numeric(df["interest"], errors="coerce").round(2)
+                df["due_date"] = pd.to_datetime(df["due_date"], errors="coerce").dt.strftime("%Y-%m-%d")
+
+            except Exception:
+                df = pd.DataFrame()
+        else:
+            df = pd.DataFrame()
+
+        # Check for duplicates
+        is_duplicate = (
+                (df["due_date"] == due_date) &
+                (df["card"] == card) &
+                (df["amount"] == amount) &
+                (df["interest"] == interest_float)
+        ).any() if not df.empty else False
+
+        if is_duplicate:
+            return  # skip duplicate
+
+        # Append and save
+        df = pd.concat([df, pd.DataFrame([new_entry])], ignore_index=True)
+        df.to_csv(debt_path, index=False)
+
+
+
+#function reads a user's debt CSV file with monthly and yearly interest
+def load_debt_data(userid):
+    debt_path = f"data/{userid}/debt.csv"
+
+    if not os.path.exists(debt_path):
+        return []
+
+    df = pd.read_csv(debt_path)
+
+    # Clean and convert interest and balance
+    df["interest"] = pd.to_numeric(df["interest"], errors="coerce").fillna(0)
+    df["amount"] = pd.to_numeric(df["amount"], errors="coerce").fillna(0)
+
+    enriched_debts = []
+    for _, row in df.iterrows():
+        monthly_interest = round((row["amount"] * row["interest"]) / 12 / 100, 2)
+        annual_interest = round((row["amount"] * row["interest"]) / 100, 2)
+
+        enriched_debts.append({
+
+            "DueDate": row["due_date"],
+            "Card": row["card"],
+            "amount": round(row["amount"], 2),
+            "InterestRate": f"{row['interest']:.2f}%",
+            "MonthlyInterest": monthly_interest,
+            "AnnualInterest": annual_interest
+        })
+
+    return enriched_debts
+
 
 #Calculates total debt
 #sort the list by interest rate
