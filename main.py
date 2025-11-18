@@ -309,6 +309,12 @@ class ChatBox(QDialog) :
         super().__init__()
         self.chatBox = Ui_Chat()
         self.chatBox.setupUi(self)   
+#        self.chatBox.sendButton.clicked.connect(self.sendChat)
+        self.chatBox.textEdit.setPlaceholderText("Type your message here...")
+
+#   def sendChat(self):
+
+
  
  
 class MainDashBoard(QMainWindow):
@@ -352,7 +358,7 @@ class MainDashBoard(QMainWindow):
         self.dashboard.debt_progressBar.setValue(percentage)
 
         self.populate_accounts_from_purchases(self.dashboard.expense_comboBox, username )
-        #self.dashboard.add_expense_button.clicked.connect(self.add_expense(username))
+        self.dashboard.add_expense_button.clicked.connect(self.addExpense)
     def showChat (self):
         self.chat = ChatBox()
         self.chat.show()
@@ -400,10 +406,10 @@ class MainDashBoard(QMainWindow):
         self.dashboard.expense_comboBox.currentIndexChanged.connect(self.on_dropdown_change)
 
     def addExpense(self, userid):
-    # Manually input expenses to purchaces.csv
+        # Manually input expenses to purchaces.csv
         filepath = f"data/{userid}/purchases.csv"
 
-    # Makes sure the path is a valid path that exists
+        # Makes sure the path is a valid path that exists
         os.makedirs(os.path.dirname(filepath), exist_ok=True)
     
         date = self.dashboard.expense_dateEdit.text().strip()
@@ -419,7 +425,7 @@ class MainDashBoard(QMainWindow):
             print("Invalid amount. Please enter a numeric value.")
             return
     
-    # Creates a dictionary to allow for appending.
+        # Creates a dictionary to allow for appending.
         expense_entry = {
             "date": date,
             "card": card,
@@ -427,23 +433,13 @@ class MainDashBoard(QMainWindow):
             "amount": amount
         }
     
-    # Creates dataframe
+        # Creates dataframe
         df = pd.DataFrame([expense_entry])
 
-    # Appends to csv file if it exists, creates one if it doesn't.
+        # Appends to csv file if it exists, creates one if it doesn't.
         file_exists = os.path.exists(filepath)
         if file_exists:
             try:
-                df_existing = pd.read_csv(filepath)
-
-                # Ensures columns are consistent
-                if not all(col in df_existing.columns for col in df.columns):
-                    print("Warning: Column mismatch detected. Adjusting...")
-                    for col in df.columns:
-                        if col not in df_existing.columns:
-                            df_existing[col] = None
-                    df_existing = df_existing[df.columns]
-
                 df.to_csv(filepath, mode="a", header=False, index=False)
             except Exception as e:
                 print(f"Error appending to existing CSV: {e}")
@@ -588,13 +584,7 @@ class MainDashBoard(QMainWindow):
             tab = self.dashboard.tracking_tabWidget.widget(i)
             if tab.layout() is None or tab.layout().isEmpty():
                 self.dashboard.tracking_tabWidget.removeTab(i)
-    def add_expense(self):
-        data = [self.dashboard.expense_dateEdit, self.dashboard.expense_comboBox, ]
-        with open("data/purchases.csv", 'a', newline='') as csvfile:
-            csv_data = ['date', 'card', 'type', 'amount']
-            writer = csv.DictWriter(csvfile, fieldnames=csv_data)
-            writer.writeheader()
-            writer.writerows(data)
+
     def logout(self):
         self.close()
 
