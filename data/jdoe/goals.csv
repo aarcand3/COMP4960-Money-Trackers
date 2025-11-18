@@ -1,2 +1,5 @@
-userid, category, amount, due_date
-jdoe, savings, 30.00, 11/29/2025
+category,amount,due_date
+vacation,1500.0,2026-06-01
+emergency fund,3000.0,2026-12-31
+new laptop,1200.0,2026-03-15
+school,1500.0,2026-06-01

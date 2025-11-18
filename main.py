@@ -131,22 +131,38 @@ def summarize_debt(debts):
             return total_debt
 
 # function Save or update a savings goal for a specific user.
-def saveCategoryGoal(userid, category, amount, due_date):
+
+def save_or_update_goal(userid, category, amount, due_date):
     try:
+        # Normalize inputs
+        category = category.strip().lower()
+        amount = float(amount)
+        datetime.strptime(due_date, "%Y-%m-%d")  # Validate date format
+
         path = f"data/{userid}/goals.csv"
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+
+        # Load or initialize goals DataFrame
         if os.path.exists(path):
             df = pd.read_csv(path)
         else:
-            df = pd.DataFrame(columns=["Category", "GoalAmount", "DueDate"])
+            df = pd.DataFrame(columns=["category", "amount", "due_date"])
 
-        if category in df["Category"].values:
-            df.loc[df["Category"] == category, ["GoalAmount", "DueDate"]] = [amount, due_date]
+        # Check if goal exists and update or append
+        match = df["category"].str.lower() == category
+        if match.any():
+            df.loc[match, ["amount", "due_date"]] = [amount, due_date]
         else:
-            new_row = pd.DataFrame([{"Category": category, "GoalAmount": amount, "DueDate": due_date}])
+            new_row = pd.DataFrame([{
+                "category": category,
+                "amount": amount,
+                "due_date": due_date
+            }])
             df = pd.concat([df, new_row], ignore_index=True)
 
         df.to_csv(path, index=False)
-        return True
+        return {"success": True}
+
     except Exception as e:
         return {"error": str(e)}
 
@@ -167,19 +183,19 @@ def getAllGoalsWithProgress(userid):
 
     enriched_goals = []
     for _, row in goals_df.iterrows():
-        category = row["Category"]
-        goal_amount = float(row["GoalAmount"])
-        due_date = row["DueDate"]
+        category = row["category"]
+        amount = float(row["amount"])
+        due_date = row["due_date"]
 
-        progress_percent = round((total_balance / goal_amount) * 100, 2) if goal_amount > 0 else 0
-        goal_met = progress_percent >= 100
+        progress_percent = round((total_balance / amount) * 100, 2) if amount > 0 else 0
+
 
         enriched_goals.append({
             "Category": category,
-            "GoalAmount": goal_amount,
+            "GoalAmount": amount,
             "DueDate": due_date,
             "ProgressPercent": progress_percent,
-            "GoalMet": goal_met
+
         })
 
     return enriched_goals
@@ -194,12 +210,11 @@ def getTotalSavingsProgress(userid):
     accounts_df = pd.read_csv(accounts_path)
     goals_df = pd.read_csv(goals_path)
 
-    # Use lowercase 'balance' column
     accounts_df["balance"] = pd.to_numeric(accounts_df["balance"], errors="coerce").fillna(0)
     total_balance = accounts_df["balance"].sum()
 
-    goals_df["GoalAmount"] = pd.to_numeric(goals_df["GoalAmount"], errors="coerce").fillna(0)
-    total_goal_amount = goals_df["GoalAmount"].sum()
+    goals_df["amount"] = pd.to_numeric(goals_df["amount"], errors="coerce").fillna(0)
+    total_goal_amount = goals_df["amount"].sum()
 
     if total_goal_amount == 0:
         return 0.0
