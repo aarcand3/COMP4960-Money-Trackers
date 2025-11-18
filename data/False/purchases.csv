@@ -1,7 +1,4 @@
-userid,password,firstname,lastname
-jdoe,password,John,Doe
-
-1/1/2000,No purchases file found,,
+date,card,type,amount
 1/20/2026,No purchases file found,Food,20
 1/20/2026,No purchases file found,Food,20
 1/20/2026,No purchases file found,Food,20
