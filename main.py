@@ -13,7 +13,6 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import *
 from login import Ui_LoginWindow
 from dashboard import Ui_MainWindow
-from chatbox import Ui_Dialog as Ui_Chat
 from datetime import datetime
 import sys
 import os
@@ -96,101 +95,28 @@ def logthis(logname):
         print("ERROR! Could not find: "+logname+" is it configured?")
 
 
-#function to add new debt
-def add_new_debt(userid, card, amount, interest, due_date):
-
-        debt_path = f"data/{userid}/debt.csv"
-
-        # Normalize inputs
-        card = str(card).strip().title()
+#function reads a user's debt CSV file
+def load_debt_data(username):
+        csv_path = f"data/{username}/debt.csv"
+        debts = []
         try:
-            amount = round(float(amount), 2)
-            interest_float = round(float(str(interest).replace('%', '')), 2)
-        except ValueError:
-            return  # skip invalid balance or interest
-
-        # Normalize due date inline
-        due_date = str(due_date).strip()
-        for fmt in ("%m/%d/%Y", "%m/%d/%y"):
-            try:
-                due_date = datetime.strptime(due_date, fmt).strftime("%Y-%m-%d")
-                break
-            except ValueError:
-                continue
-        else:
-            return  # skip invalid date
-
-        new_entry = {
-            "due_date": due_date,
-            "card": card,
-            "amount": amount,
-            "interest": interest_float
-        }
-
-        os.makedirs(os.path.dirname(debt_path), exist_ok=True)
-
-        # Load and normalize existing data
-        if os.path.exists(debt_path):
-            try:
-                df = pd.read_csv(debt_path)
-
-                df["card"] = df["card"].astype(str).str.strip().str.title()
-                df["amount"] = pd.to_numeric(df["amount"], errors="coerce").round(2)
-                df["interest"] = pd.to_numeric(df["interest"], errors="coerce").round(2)
-                df["due_date"] = pd.to_datetime(df["due_date"], errors="coerce").dt.strftime("%Y-%m-%d")
-
-            except Exception:
-                df = pd.DataFrame()
-        else:
-            df = pd.DataFrame()
-
-        # Check for duplicates
-        is_duplicate = (
-                (df["due_date"] == due_date) &
-                (df["card"] == card) &
-                (df["amount"] == amount) &
-                (df["interest"] == interest_float)
-        ).any() if not df.empty else False
-
-        if is_duplicate:
-            return  # skip duplicate
-
-        # Append and save
-        df = pd.concat([df, pd.DataFrame([new_entry])], ignore_index=True)
-        df.to_csv(debt_path, index=False)
-
-
-
-#function reads a user's debt CSV file with monthly and yearly interest
-def load_debt_data(userid):
-    debt_path = f"data/{userid}/debt.csv"
-
-    if not os.path.exists(debt_path):
-        return []
-
-    df = pd.read_csv(debt_path)
-
-    # Clean and convert interest and balance
-    df["interest"] = pd.to_numeric(df["interest"], errors="coerce").fillna(0)
-    df["amount"] = pd.to_numeric(df["amount"], errors="coerce").fillna(0)
-
-    enriched_debts = []
-    for _, row in df.iterrows():
-        monthly_interest = round((row["amount"] * row["interest"]) / 12 / 100, 2)
-        annual_interest = round((row["amount"] * row["interest"]) / 100, 2)
-
-        enriched_debts.append({
-
-            "DueDate": row["due_date"],
-            "Card": row["card"],
-            "amount": round(row["amount"], 2),
-            "InterestRate": f"{row['interest']:.2f}%",
-            "MonthlyInterest": monthly_interest,
-            "AnnualInterest": annual_interest
-        })
-
-    return enriched_debts
-
+            with open(csv_path, 'r') as file:
+                reader = csv.DictReader(file)
+                for row in reader:
+                    vendor = row['card'].strip()
+                    balance = float(row['balance'])
+                    interest_str = row['interest'].strip().replace('%', '')  # ✅ Strip %
+                    interest = float(interest_str)
+                    debts.append({
+                        'vendor': vendor,
+                        'balance': balance,
+                        'interest': interest
+                    })
+        except FileNotFoundError:
+            print(f"⚠️ Debt file not found for user: {username}")
+        except Exception as e:
+            print(f"⚠️ Error loading debt data for {username}: {e}")
+        return debts
 
 #Calculates total debt
 #sort the list by interest rate
@@ -204,38 +130,22 @@ def summarize_debt(debts):
             return total_debt
 
 # function Save or update a savings goal for a specific user.
-
-def save_or_update_goal(userid, category, amount, due_date):
+def saveCategoryGoal(userid, category, amount, due_date):
     try:
-        # Normalize inputs
-        category = category.strip().lower()
-        amount = float(amount)
-        datetime.strptime(due_date, "%Y-%m-%d")  # Validate date format
-
         path = f"data/{userid}/goals.csv"
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-
-        # Load or initialize goals DataFrame
         if os.path.exists(path):
             df = pd.read_csv(path)
         else:
-            df = pd.DataFrame(columns=["category", "amount", "due_date"])
+            df = pd.DataFrame(columns=["Category", "GoalAmount", "DueDate"])
 
-        # Check if goal exists and update or append
-        match = df["category"].str.lower() == category
-        if match.any():
-            df.loc[match, ["amount", "due_date"]] = [amount, due_date]
+        if category in df["Category"].values:
+            df.loc[df["Category"] == category, ["GoalAmount", "DueDate"]] = [amount, due_date]
         else:
-            new_row = pd.DataFrame([{
-                "category": category,
-                "amount": amount,
-                "due_date": due_date
-            }])
+            new_row = pd.DataFrame([{"Category": category, "GoalAmount": amount, "DueDate": due_date}])
             df = pd.concat([df, new_row], ignore_index=True)
 
         df.to_csv(path, index=False)
-        return {"success": True}
-
+        return True
     except Exception as e:
         return {"error": str(e)}
 
@@ -256,23 +166,24 @@ def getAllGoalsWithProgress(userid):
 
     enriched_goals = []
     for _, row in goals_df.iterrows():
-        category = row["category"]
-        amount = float(row["amount"])
-        due_date = row["due_date"]
+        category = row["Category"]
+        goal_amount = float(row["GoalAmount"])
+        due_date = row["DueDate"]
 
-        progress_percent = round((total_balance / amount) * 100, 2) if amount > 0 else 0
-
+        progress_percent = round((total_balance / goal_amount) * 100, 2) if goal_amount > 0 else 0
+        goal_met = progress_percent >= 100
 
         enriched_goals.append({
             "Category": category,
-            "GoalAmount": amount,
+            "GoalAmount": goal_amount,
             "DueDate": due_date,
             "ProgressPercent": progress_percent,
-
+            "GoalMet": goal_met
         })
 
     return enriched_goals
 
+#Returns total savings progress across all goals
 def getTotalSavingsProgress(userid):
     accounts_path = f"data/{userid}/accounts.csv"
     goals_path = f"data/{userid}/goals.csv"
@@ -283,19 +194,19 @@ def getTotalSavingsProgress(userid):
     accounts_df = pd.read_csv(accounts_path)
     goals_df = pd.read_csv(goals_path)
 
+    # Use lowercase 'balance' column
     accounts_df["balance"] = pd.to_numeric(accounts_df["balance"], errors="coerce").fillna(0)
     total_balance = accounts_df["balance"].sum()
 
-    goals_df["amount"] = pd.to_numeric(goals_df["amount"], errors="coerce").fillna(0)
-    total_goal_amount = goals_df["amount"].sum()
+    goals_df["GoalAmount"] = pd.to_numeric(goals_df["GoalAmount"], errors="coerce").fillna(0)
+    total_goal_amount = goals_df["GoalAmount"].sum()
 
     if total_goal_amount == 0:
         return 0.0
 
     total_progress = round((total_balance / total_goal_amount) * 100, 2)
     return total_progress
-
-
+#
 # login window and validation
 class LoginWindow (QMainWindow):
     def __init__(self):
@@ -329,33 +240,11 @@ class LoginWindow (QMainWindow):
                         writer = csv.writer(file)
                         writer.writerow(userdata)
                     logthis("login.log")
-                    self.createfiles(username)
                     self.dashboard_window= MainDashBoard()
                     self.dashboard_window.logged_in(username)
                     self.dashboard_window.show()
                     self.close()
 
-    def createfiles(self, username):
-        # Define the path for user data
-        base_path = os.path.join("data", "users", username)
-        os.makedirs(base_path, exist_ok=True)
-
-        purchases_file = os.path.join(base_path, "purchases.csv")
-        savings_file = os.path.join(base_path, "goals.csv")
-        accounts_file = os.path.join(base_path, "accounts.csv")
-
-    # Create each file Should we do more?
-        with open(purchases_file, mode="w", newline='') as f:
-            writer = csv.writer(f)
-            writer.writerow(["Date", "Card", "Type","Amount"])
-
-        with open(savings_file, mode="w", newline='') as f:
-            writer = csv.writer(f)
-            writer.writerow(["UserID", "Category", "Ammount", "Deadline"]) #check with sonia?
-
-        with open(accounts_file, mode="w", newline='') as f:
-            writer = csv.writer(f)
-            writer.writerow(["Date", "Bank", "Balance"])
 
     def check_login(self):
         userdata[0] = self.ui.user_box.text()
@@ -377,19 +266,7 @@ class LoginWindow (QMainWindow):
                     self.close()
                     return
             QMessageBox.warning(self, "Login Failed", "Invalid username or password.")
-class ChatBox(QDialog) :
-    def __init__(self):
-        super().__init__()
-        self.chatBox = Ui_Chat()
-        self.chatBox.setupUi(self)   
-#        self.chatBox.sendButton.clicked.connect(self.sendChat)
-        self.chatBox.textEdit.setPlaceholderText("Type your message here...")
-
-#   def sendChat(self):
-
-
- 
- 
+            
 class MainDashBoard(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -397,7 +274,6 @@ class MainDashBoard(QMainWindow):
         self.dashboard.setupUi(self)
         self.dashboard.logoutButton.clicked.connect(self.logout)
         self.dashboard.userchoice_comboBox.currentIndexChanged.connect(self.on_dropdown_change)
-        self.dashboard.chatButton.clicked.connect(self.showChat)
         self.dashboard.frame.setAcceptDrops(True)
         self.setStyleSheet(f"""
         QWidget {{
@@ -423,34 +299,36 @@ class MainDashBoard(QMainWindow):
         self.show_charts(username)
         self.on_dropdown_change(self.dashboard.userchoice_comboBox.currentIndex())
 
-        percentage = 0 #  getTotalSavingsProgress(username)
+        percentage = getTotalSavingsProgress(username)
         if percentage is not None:
             percentage = int(percentage)
         else:
             percentage = 0  #fallback value
         self.dashboard.debt_progressBar.setValue(percentage)
 
-        self.populate_accounts_from_purchases(self.dashboard.expense_comboBox, username )
-        self.dashboard.add_expense_button.clicked.connect(self.addExpense)
-    def showChat (self):
-        self.chat = ChatBox()
-        self.chat.show()
+        self.populate_accounts_from_purchases(self.dashboard.expense_comboBox)
+        #self.dashboard.add_expense_button.clicked.connect(self.add_expense(username))
 
-    def populate_accounts_from_purchases(self, combo_box: QComboBox, username):
+    def populate_accounts_from_purchases(self, combo_box):
         combo_box.clear()
-        filepath = "data/{username}/purchases.csv"
+        filepath = f"data/{self.current_username}/purchases.csv"
         seen_cards = set()
+
         try:
             with open(filepath, newline='') as csvfile:
                 reader = csv.DictReader(csvfile)
+
                 for row in reader:
-                    card = row.get("card")
+                    card = row.get("card", "").strip()
                     if card and card not in seen_cards:
-                        combo_box.addItem(card)
-                    seen_cards.add(card)
+                     combo_box.addItem(card)
+                     seen_cards.add(card)
+
+            if not seen_cards:
+                combo_box.addItem("No cards found")
+
         except FileNotFoundError:
             combo_box.addItem("No purchases file found")
-
     def on_dropdown_change(self, index):
         for widget in self.dashboard.csv_group:
                 widget.hide()
@@ -475,30 +353,26 @@ class MainDashBoard(QMainWindow):
                 widget.show()
         elif index == 4:
             for widget in self.dashboard.savings_group:
-                widget.show()    
+                widget.hide()    # need to replace for whatever we choose to add a savings goal?
         self.dashboard.expense_comboBox.currentIndexChanged.connect(self.on_dropdown_change)
 
     def addExpense(self, userid):
-        # Manually input expenses to purchaces.csv
+    # Manually input expenses to purchaces.csv
         filepath = f"data/{userid}/purchases.csv"
 
-        # Makes sure the path is a valid path that exists
+    # Makes sure the path is a valid path that exists
         os.makedirs(os.path.dirname(filepath), exist_ok=True)
     
         date = self.dashboard.expense_dateEdit.text().strip()
         card = self.dashboard.expense_comboBox.currentText().strip()
         category = self.dashboard.type_lineEdit.text().strip()
-        amount = self.dashboard.ammount_edit.text().strip()
-        expensedata = [date, card, category, amount]
-        try:        
-            with open("data/userlist.csv", mode = "a", newline='') as file:
-                writer = csv.writer(file)
-                writer.writerow(expensedata)
+        try:
+            amount = self.dashboard.ammount_edit.text().strip()
         except ValueError:
             print("Invalid amount. Please enter a numeric value.")
             return
     
-        # Creates a dictionary to allow for appending.
+    # Creates a dictionary to allow for appending.
         expense_entry = {
             "date": date,
             "card": card,
@@ -506,13 +380,23 @@ class MainDashBoard(QMainWindow):
             "amount": amount
         }
     
-        # Creates dataframe
+    # Creates dataframe
         df = pd.DataFrame([expense_entry])
 
-        # Appends to csv file if it exists, creates one if it doesn't.
+    # Appends to csv file if it exists, creates one if it doesn't.
         file_exists = os.path.exists(filepath)
         if file_exists:
             try:
+                df_existing = pd.read_csv(filepath)
+
+                # Ensures columns are consistent
+                if not all(col in df_existing.columns for col in df.columns):
+                    print("Warning: Column mismatch detected. Adjusting...")
+                    for col in df.columns:
+                        if col not in df_existing.columns:
+                            df_existing[col] = None
+                    df_existing = df_existing[df.columns]
+
                 df.to_csv(filepath, mode="a", header=False, index=False)
             except Exception as e:
                 print(f"Error appending to existing CSV: {e}")
@@ -542,7 +426,7 @@ class MainDashBoard(QMainWindow):
 
         #Normalize column names
             rename_map = {
-               'date': 'date',
+                'date': 'date',
                 'card': 'card',
                 'type': 'type',
                 'category': 'type',
@@ -593,13 +477,15 @@ class MainDashBoard(QMainWindow):
             QMessageBox.warning(self,"Missing File", f"Could not find file for {username}")
 
         debt_model = QStandardItemModel()
-#       try:      get debt to show single line not summary? or maybe summarize debt and savings in one file?
-#            debt = load_debt_data(username)
-#           debt_summary = summarize_debt(debt)
-#            for debt_summary:
-#            self.dashboard.debt_tableView.setModel(debt_model)
-#        except FileNotFoundError:
-#            QMessageBox.warning(self, "Missing File", f"Could not find debt file")
+        try:
+            debts = load_debt_data(username)
+
+            for row in debts:
+                items = [QStandardItem(cell) for cell in row]
+                debt_model.appendRow(items)
+            self.dashboard.debt_tableView.setModel(debt_model)
+        except FileNotFoundError:
+            QMessageBox.warning(self, "Missing File", f"Could not find debt file")
     def create_chart(self, title, data_dict):
         series = QPieSeries()
         for label, value in data_dict.items():
@@ -657,7 +543,13 @@ class MainDashBoard(QMainWindow):
             tab = self.dashboard.tracking_tabWidget.widget(i)
             if tab.layout() is None or tab.layout().isEmpty():
                 self.dashboard.tracking_tabWidget.removeTab(i)
-
+    def add_expense(self):
+        data = [self.dashboard.expense_dateEdit, self.dashboard.expense_comboBox, ]
+        with open("data/purchases.csv", 'a', newline='') as csvfile:
+            csv_data = ['date', 'card', 'type', 'amount']
+            writer = csv.DictWriter(csvfile, fieldnames=csv_data)
+            writer.writeheader()
+            writer.writerows(data)
     def logout(self):
         self.close()
 
