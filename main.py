@@ -376,9 +376,9 @@ class MainDashBoard(QMainWindow):
         self.WarningBox = WarningBox("Warning. This Application is not responsible for any financial advice given. Please consult a professional for serious matters. By clicking ok you acknowledge responsibility for your own actions.")
         self.WarningBox.showWarning()
 
-    def populate_accounts_from_purchases(self, combo_box, current_username):
+    def populate_accounts_from_purchases(self, combo_box, userid):
         combo_box.clear()
-        filepath = f"data/{current_username}/purchases.csv"
+        filepath = f"data/{userid}/purchases.csv"
         seen_cards = set()
 
         try:
