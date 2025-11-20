@@ -2,8 +2,10 @@
 # Jack Donahue, Simon Dean, Allison Arcand, Sonia Yahi
 
 # Library imports & Initial Values
+from cProfile import label
 import csv
 import math
+from wsgiref import headers
 import pandas as pd
 from PyQt5 import QtWidgets
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QPainter
@@ -11,6 +13,7 @@ from PyQt5.QtChart import QChart, QChartView, QPieSeries ##If not loading for te
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import *
+import debt
 from login import Ui_LoginWindow
 from dashboard import Ui_MainWindow
 from chatbox import Ui_Dialog as Ui_Chat
@@ -193,7 +196,7 @@ def load_debt_data(userid):
 
 
 #Calculates total debt
-#sort the list by interest rate
+#sort the list by interest rate   
 
 def summarize_debt(debts):
             total_debt = sum(d['balance'] for d in debts)
@@ -259,19 +262,13 @@ def getAllGoalsWithProgress(userid):
         category = row["category"]
         amount = float(row["amount"])
         due_date = row["due_date"]
-
         progress_percent = round((total_balance / amount) * 100, 2) if amount > 0 else 0
 
-
-        enriched_goals.append({
-            "Category": category,
-            "GoalAmount": amount,
-            "DueDate": due_date,
-            "ProgressPercent": progress_percent,
-
-        })
+        enriched_goals.append((category, amount, due_date, progress_percent))  #needed tuple
 
     return enriched_goals
+
+
 
 def getTotalSavingsProgress(userid):
     accounts_path = f"data/{userid}/accounts.csv"
@@ -385,9 +382,36 @@ class ChatBox(QDialog) :
 #        self.chatBox.sendButton.clicked.connect(self.sendChat)
         self.chatBox.textEdit.setPlaceholderText("Type your message here...")
 
-#   def sendChat(self):
+#    def sendChat(self):
 
 
+class WarningBox(QDialog):
+    def __init__(self, message):
+        super().__init__()
+        self.setWindowTitle("Warning")
+        self.layout = QVBoxLayout()
+        self.setModal(True)
+        self.label = QLabel(message)
+        self.layout.addWidget(self.label)
+        self.checkbox = QCheckBox("I understand the risks")
+        self.checkbox.stateChanged.connect(self.toggle_ok_button)
+        self.button = QPushButton("OK")
+        self.button.setEnabled(False)
+        self.layout.addWidget(self.button)
+        self.layout.addWidget(self.checkbox)
+        self.setLayout(self.layout)
+    
+    def toggle_ok_button(self, state):
+        self.button.setEnabled(state == Qt.Checked)
+        self.chat = ChatBox()
+        self.button.clicked.connect(self.chat.show)
+    def proceed_to_chat(self):
+        self.close()
+        self.chat = ChatBox()
+        self.chat.show()
+
+    def showWarning(self):
+        self.exec_()
  
  
 class MainDashBoard(QMainWindow):
@@ -423,7 +447,7 @@ class MainDashBoard(QMainWindow):
         self.show_charts(username)
         self.on_dropdown_change(self.dashboard.userchoice_comboBox.currentIndex())
 
-        percentage = 0 #  getTotalSavingsProgress(username)
+        percentage = getTotalSavingsProgress(username)
         if percentage is not None:
             percentage = int(percentage)
         else:
@@ -433,8 +457,9 @@ class MainDashBoard(QMainWindow):
         self.populate_accounts_from_purchases(self.dashboard.expense_comboBox, username )
         self.dashboard.add_expense_button.clicked.connect(self.addExpense)
     def showChat (self):
-        self.chat = ChatBox()
-        self.chat.show()
+        self.WarningBox = WarningBox("Warning. This Application is not responsible for any financial advice given. Please consult a professional for serious matters. By clicking ok you acknowledge responsibility for your own actions.")
+        self.WarningBox.showWarning()
+
 
     def populate_accounts_from_purchases(self, combo_box: QComboBox, username):
         combo_box.clear()
@@ -592,14 +617,28 @@ class MainDashBoard(QMainWindow):
         except FileNotFoundError:
             QMessageBox.warning(self,"Missing File", f"Could not find file for {username}")
 
-        debt_model = QStandardItemModel()
-#       try:      get debt to show single line not summary? or maybe summarize debt and savings in one file?
-#            debt = load_debt_data(username)
-#           debt_summary = summarize_debt(debt)
-#            for debt_summary:
-#            self.dashboard.debt_tableView.setModel(debt_model)
-#        except FileNotFoundError:
-#            QMessageBox.warning(self, "Missing File", f"Could not find debt file")
+    # Load goals with progress
+        goals_model = QStandardItemModel()
+        try:
+            goals = getAllGoalsWithProgress(username)
+            headers = ["Category", "GoalAmount", "DueDate", "ProgressPercent"]
+            goals_model.setColumnCount(len(headers))
+            for category, amount, due_date, progress_percent in goals:
+                row = [
+                QStandardItem(str(category)),
+                QStandardItem(str(amount)),
+                QStandardItem(str(due_date)),
+                QStandardItem(f"{progress_percent}%")
+            ]
+            goals_model.setHorizontalHeaderLabels(headers)
+            goals_model.appendRow(row)
+
+            self.dashboard.debt_tableView.setModel(goals_model)
+        except FileNotFoundError:
+            QMessageBox.warning(self, "Missing File", f"Could not find debt file")
+
+
+
     def create_chart(self, title, data_dict):
         series = QPieSeries()
         for label, value in data_dict.items():
