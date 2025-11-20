@@ -176,8 +176,8 @@ def getAllGoalsWithProgress(userid):
     enriched_goals = []
     for _, row in goals_df.iterrows():
         category = row["category"]
-        amount = float(row["amount"])
-        due_date = row["due_date"]
+        amount = float(row["goalamount"])
+        due_date = row["duedate"]
 
         progress_percent = round((total_balance / amount) * 100, 2) if amount > 0 else 0
 
@@ -200,8 +200,8 @@ def getTotalSavingsProgress(userid):
     accounts_df["balance"] = pd.to_numeric(accounts_df["balance"], errors="coerce").fillna(0)
     total_balance = accounts_df["balance"].sum()
 
-    goals_df["amount"] = pd.to_numeric(goals_df["amount"], errors="coerce").fillna(0)
-    total_goal_amount = goals_df["amount"].sum()
+    goals_df["goalamount"] = pd.to_numeric(goals_df["goalamount"], errors="coerce").fillna(0)
+    total_goal_amount = goals_df["goalamount"].sum()
 
     if total_goal_amount == 0:
         return 0.0
