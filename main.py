@@ -13,7 +13,8 @@ from PyQt5.QtChart import QChart, QChartView, QPieSeries ##If not loading for te
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import *
-import debt
+#import debt
+from chatbox import Ui_Dialog as Ui_Chat
 from login import Ui_LoginWindow
 from dashboard import Ui_MainWindow
 from datetime import datetime
@@ -96,7 +97,12 @@ def logthis(logname):
         
     else:
         print("ERROR! Could not find: "+logname+" is it configured?")
+def add_new_debt(userid, card, amount, interest, due_date):
 
+        debt_path = f"data/{userid}/debt.csv"
+
+        # Normalize inputs
+        card = str(card).strip().title()
 
 #function reads a user's debt CSV file
 def load_debt_data(username):
@@ -176,15 +182,9 @@ def getAllGoalsWithProgress(userid):
         progress_percent = round((total_balance / amount) * 100, 2) if amount > 0 else 0
 
 
-        enriched_goals.append({
-            "Category": category,
-            "GoalAmount": amount,
-            "DueDate": due_date,
-            "ProgressPercent": progress_percent,
+        enriched_goals.append((category, amount, due_date, progress_percent))  #needed tuple
 
-        })
-
-    return enriched_goals
+        return enriched_goals
 
 def getTotalSavingsProgress(userid):
     accounts_path = f"data/{userid}/accounts.csv"
@@ -200,8 +200,8 @@ def getTotalSavingsProgress(userid):
     accounts_df["balance"] = pd.to_numeric(accounts_df["balance"], errors="coerce").fillna(0)
     total_balance = accounts_df["balance"].sum()
 
-    goals_df["GoalAmount"] = pd.to_numeric(goals_df["GoalAmount"], errors="coerce").fillna(0)
-    total_goal_amount = goals_df["GoalAmount"].sum()
+    goals_df["amount"] = pd.to_numeric(goals_df["amount"], errors="coerce").fillna(0)
+    total_goal_amount = goals_df["amount"].sum()
 
     if total_goal_amount == 0:
         return 0.0
@@ -215,6 +215,7 @@ class LoginWindow (QMainWindow):
         super().__init__()
         self.ui = Ui_LoginWindow()
         self.ui.setupUi(self)
+
         self.ui.login_button.clicked.connect(self.check_login)
         self.ui.createaccount_button.clicked.connect(self.create_user)
     def create_user(self):
@@ -242,10 +243,32 @@ class LoginWindow (QMainWindow):
                         writer = csv.writer(file)
                         writer.writerow(userdata)
                     logthis("login.log")
+                    self.createfiles(username)
                     self.dashboard_window= MainDashBoard()
                     self.dashboard_window.logged_in(username)
                     self.dashboard_window.show()
                     self.close()
+    def createfiles(self, username):
+        # Define the path for user data
+        base_path = os.path.join("data", "users", username)
+        os.makedirs(base_path, exist_ok=True)
+
+        purchases_file = os.path.join(base_path, "purchases.csv")
+        savings_file = os.path.join(base_path, "goals.csv")
+        accounts_file = os.path.join(base_path, "accounts.csv")
+
+    # Create each file Should we do more?
+        with open(purchases_file, mode="w", newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(["Date", "Card", "Type","Amount"])
+
+        with open(savings_file, mode="w", newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(["UserID", "Category", "Ammount", "Deadline"]) #check with sonia?
+
+        with open(accounts_file, mode="w", newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(["Date", "Bank", "Balance"])
 
 
     def check_login(self):
@@ -278,7 +301,33 @@ class ChatBox(QDialog) :
 
 #   def sendChat(self):
 
+class WarningBox(QDialog):
+    def __init__(self, message):
+        super().__init__()
+        self.setWindowTitle("Warning")
+        self.layout = QVBoxLayout()
+        self.setModal(True)
+        self.label = QLabel(message)
+        self.layout.addWidget(self.label)
+        self.checkbox = QCheckBox("I understand the risks")
+        self.checkbox.stateChanged.connect(self.toggle_ok_button)
+        self.button = QPushButton("OK")
+        self.button.setEnabled(False)
+        self.layout.addWidget(self.button)
+        self.layout.addWidget(self.checkbox)
+        self.setLayout(self.layout)
+    
+    def toggle_ok_button(self, state):
+        self.button.setEnabled(state == Qt.Checked)
+        self.chat = ChatBox()
+        self.button.clicked.connect(self.chat.show)
+    def proceed_to_chat(self):
+        self.close()
+        self.chat = ChatBox()
+        self.chat.show()
 
+    def showWarning(self):
+        self.exec_()
  
  
 class MainDashBoard(QMainWindow):
@@ -288,6 +337,7 @@ class MainDashBoard(QMainWindow):
         self.dashboard.setupUi(self)
         self.dashboard.logoutButton.clicked.connect(self.logout)
         self.dashboard.userchoice_comboBox.currentIndexChanged.connect(self.on_dropdown_change)
+        self.dashboard.chatButton.clicked.connect(self.showChat)
         self.dashboard.frame.setAcceptDrops(True)
         self.setStyleSheet(f"""
         QWidget {{
@@ -323,12 +373,12 @@ class MainDashBoard(QMainWindow):
         self.populate_accounts_from_purchases(self.dashboard.expense_comboBox, username )
         self.dashboard.add_expense_button.clicked.connect(self.addExpense)
     def showChat (self):
-        self.chat = ChatBox()
-        self.chat.show()
+        self.WarningBox = WarningBox("Warning. This Application is not responsible for any financial advice given. Please consult a professional for serious matters. By clicking ok you acknowledge responsibility for your own actions.")
+        self.WarningBox.showWarning()
 
-    def populate_accounts_from_purchases(self, combo_box):
+    def populate_accounts_from_purchases(self, combo_box, current_username):
         combo_box.clear()
-        filepath = f"data/{self.current_username}/purchases.csv"
+        filepath = f"data/{current_username}/purchases.csv"
         seen_cards = set()
 
         try:
@@ -383,8 +433,12 @@ class MainDashBoard(QMainWindow):
         date = self.dashboard.expense_dateEdit.text().strip()
         card = self.dashboard.expense_comboBox.currentText().strip()
         category = self.dashboard.type_lineEdit.text().strip()
-        try:
-            amount = self.dashboard.ammount_edit.text().strip()
+        amount = self.dashboard.ammount_edit.text().strip()
+        expensedata = [date, card, category, amount]
+        try:        
+            with open("data/userlist.csv", mode = "a", newline='') as file:
+                writer = csv.writer(file)
+                writer.writerow(expensedata)
         except ValueError:
             print("Invalid amount. Please enter a numeric value.")
             return
@@ -492,15 +546,27 @@ class MainDashBoard(QMainWindow):
             self.dashboard.transaction_tableView.setModel(model)
         except FileNotFoundError:
             QMessageBox.warning(self,"Missing File", f"Could not find file for {username}")
+        
+        goals_model = QStandardItemModel()
+        try:
+            goals = getAllGoalsWithProgress(username)
+            headers = ["Category", "GoalAmount", "DueDate", "ProgressPercent"]
+            goals_model.setColumnCount(len(headers))
+            for category, amount, due_date, progress_percent in goals:
+                row = [
+                QStandardItem(str(category)),
+                QStandardItem(str(amount)),
+                QStandardItem(str(due_date)),
+                QStandardItem(f"{progress_percent}%")
+            ]
+            goals_model.setHorizontalHeaderLabels(headers)
+            goals_model.appendRow(row)
 
-        debt_model = QStandardItemModel()
-#       try:      get debt to show single line not summary? or maybe summarize debt and savings in one file?
-#            debt = load_debt_data(username)
-#           debt_summary = summarize_debt(debt)
-#            for debt_summary:
-#            self.dashboard.debt_tableView.setModel(debt_model)
-#        except FileNotFoundError:
-#            QMessageBox.warning(self, "Missing File", f"Could not find debt file")
+            self.dashboard.debt_tableView.setModel(goals_model)
+        except FileNotFoundError:
+            QMessageBox.warning(self, "Missing File", f"Could not find debt file")
+
+
     def create_chart(self, title, data_dict):
         series = QPieSeries()
         for label, value in data_dict.items():
@@ -558,13 +624,7 @@ class MainDashBoard(QMainWindow):
             tab = self.dashboard.tracking_tabWidget.widget(i)
             if tab.layout() is None or tab.layout().isEmpty():
                 self.dashboard.tracking_tabWidget.removeTab(i)
-    def add_expense(self):
-        data = [self.dashboard.expense_dateEdit, self.dashboard.expense_comboBox, ]
-        with open("data/purchases.csv", 'a', newline='') as csvfile:
-            csv_data = ['date', 'card', 'type', 'amount']
-            writer = csv.DictWriter(csvfile, fieldnames=csv_data)
-            writer.writeheader()
-            writer.writerows(data)
+
     def logout(self):
         self.close()
 
