@@ -13,7 +13,6 @@ from PyQt5.QtChart import QChart, QChartView, QPieSeries ##If not loading for te
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import *
-import debt
 from login import Ui_LoginWindow
 from dashboard import Ui_MainWindow
 from datetime import datetime
@@ -97,7 +96,10 @@ def logthis(logname):
     else:
         print("ERROR! Could not find: "+logname+" is it configured?")
 
-
+#function to add new debt
+def add_new_debt(userid, card, amount, interest, due_date):
+        debt_path = f"data/{userid}/debt.csv"
+        card = str(card).strip().title() 
 #function reads a user's debt CSV file
 def load_debt_data(username):
         csv_path = f"data/{username}/debt.csv"
@@ -326,9 +328,9 @@ class MainDashBoard(QMainWindow):
         self.chat = ChatBox()
         self.chat.show()
 
-    def populate_accounts_from_purchases(self, combo_box):
+    def populate_accounts_from_purchases(self, combo_box, userid):
         combo_box.clear()
-        filepath = f"data/{self.current_username}/purchases.csv"
+        filepath = f"data/{userid}/purchases.csv"
         seen_cards = set()
 
         try:
