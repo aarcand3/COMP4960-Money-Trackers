@@ -97,84 +97,35 @@ def logthis(logname):
         
     else:
         print("ERROR! Could not find: "+logname+" is it configured?")
-
-#function to add new debt
 def add_new_debt(userid, card, amount, interest, due_date):
-    # Normalize inputs
-    card = card.strip().lower()
-    due_date = due_date.strip()
-    try:
-        amount = float(amount)
-        interest = float(interest)
-    except ValueError:
-        return  # Invalid numeric input; silently exit for GUI
 
-    # Ensure user folder exists
-    folder = f"data/{userid}"
-    os.makedirs(folder, exist_ok=True)
-    path = os.path.join(folder, "debt.csv")
+        debt_path = f"data/{userid}/debt.csv"
 
-    # Load or initialize debt data
-    if os.path.exists(path):
-        df = pd.read_csv(path)
-    else:
-        df = pd.DataFrame(columns=["due_date", "card", "amount", "interest"])
+        # Normalize inputs
+        card = str(card).strip().title()
 
-    # Normalize existing data for duplicate check
-    df["card"] = df["card"].astype(str).str.lower()
-    df["due_date"] = df["due_date"].astype(str).str.strip()
-
-    # Check for duplicate
-    duplicate = (
-        (df["card"] == card) &
-        (df["due_date"] == due_date) &
-        (df["amount"] == amount) &
-        (df["interest"] == interest)
-    ).any()
-
-    if not duplicate:
-        new_row = {
-            "due_date": due_date,
-            "card": card,
-            "amount": amount,
-            "interest": interest
-        }
-        df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
-        df.to_csv(path, index=False)
-
-#function to display the debt with monthly and yearly interest
-def load_debt_data(userid):
-    path = f"data/{userid}/debt.csv"
-    if not os.path.exists(path):
-        return []
-
-    df = pd.read_csv(path)
-
-    # Drop rows with missing required fields
-    df = df.dropna(subset=["due_date", "card", "amount", "interest"])
-
-    # Normalize and convert
-    df["card"] = df["card"].astype(str).str.strip()
-    df["due_date"] = df["due_date"].astype(str).str.strip()
-    df["amount"] = pd.to_numeric(df["amount"], errors="coerce").fillna(0)
-    df["interest"] = pd.to_numeric(df["interest"], errors="coerce").fillna(0)
-
-    enriched = []
-    for _, row in df.iterrows():
-        monthly = round((row["amount"] * row["interest"]) / 12 / 100, 2)
-        annual = round((row["amount"] * row["interest"]) / 100, 2)
-
-        enriched.append({
-            "DueDate": row["due_date"],
-            "Card": row["card"],
-            "amount": round(row["amount"], 2),
-            "InterestRate": f"{row['interest']:.2f}%",
-            "MonthlyInterest": monthly,
-            "AnnualInterest": annual
-        })
-
-    return enriched
-
+#function reads a user's debt CSV file
+def load_debt_data(username):
+        csv_path = f"data/{username}/debt.csv"
+        debts = []
+        try:
+            with open(csv_path, 'r') as file:
+                reader = csv.DictReader(file)
+                for row in reader:
+                    vendor = row['card'].strip()
+                    balance = float(row['balance'])
+                    interest_str = row['interest'].strip().replace('%', '')  # ✅ Strip %
+                    interest = float(interest_str)
+                    debts.append({
+                        'vendor': vendor,
+                        'balance': balance,
+                        'interest': interest
+                    })
+        except FileNotFoundError:
+            print(f"⚠️ Debt file not found for user: {username}")
+        except Exception as e:
+            print(f"⚠️ Error loading debt data for {username}: {e}")
+        return debts
 
 #Calculates total debt
 #sort the list by interest rate   
@@ -522,7 +473,16 @@ class MainDashBoard(QMainWindow):
                 print(f"Error appending to existing CSV: {e}")
         else:
             df.to_csv(filepath, mode="w", index=False)
-
+    def importfileEvent(self,event):
+        if event.mimeData().hasUrls():
+            event.acceptProposedAction()
+        else:
+            event.ignore()
+    def dropEvent(self,event):
+        for url in event.mimeData().urls():
+            filePath = url.toLocalFile()
+            print("File dropped: ", filePath)
+            
 #imports a csv from an application (Excel for now)
     def import_csv_from_app(self, userid, target_name, file_path):
         try:
