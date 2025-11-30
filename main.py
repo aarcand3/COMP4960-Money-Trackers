@@ -5,13 +5,14 @@
 from cProfile import label
 import csv
 import math
+import shutil
 from wsgiref import headers
 import pandas as pd
 from PyQt5 import QtWidgets
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QPainter
 from PyQt5.QtChart import QChart, QChartView, QPieSeries ##If not loading for team pip install PyQtChart
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QEvent
 from PyQt5.QtWidgets import *
 #import debt
 from chatbox import Ui_Dialog as Ui_Chat
@@ -339,6 +340,8 @@ class MainDashBoard(QMainWindow):
         self.dashboard.userchoice_comboBox.currentIndexChanged.connect(self.on_dropdown_change)
         self.dashboard.chatButton.clicked.connect(self.showChat)
         self.dashboard.frame.setAcceptDrops(True)
+        self.dashboard.frame.installEventFilter(self)
+
         self.setStyleSheet(f"""
         QWidget {{
             background-color:  #D8E4DC;  /* Light sage green */;
@@ -412,6 +415,7 @@ class MainDashBoard(QMainWindow):
         elif index == 1:
             for widget in self.dashboard.csv_group:
                 widget.show()
+                self.dashboard.frame.setAcceptDrops(True)
         elif index == 2:
             for widget in self.dashboard.add_account_group:
                 widget.hide()#replace with add account ?
@@ -473,15 +477,33 @@ class MainDashBoard(QMainWindow):
                 print(f"Error appending to existing CSV: {e}")
         else:
             df.to_csv(filepath, mode="w", index=False)
-    def importfileEvent(self,event):
-        if event.mimeData().hasUrls():
-            event.acceptProposedAction()
-        else:
-            event.ignore()
-    def dropEvent(self,event):
-        for url in event.mimeData().urls():
-            filePath = url.toLocalFile()
-            print("File dropped: ", filePath)
+    def eventFilter(self, obj, event): #accept csv files only 
+        if obj == self.dashboard.frame:
+            if event.type() == QEvent.DragEnter: #need qevent to accept drops
+                if event.mimeData().hasUrls():
+                    for url in event.mimeData().urls():
+                        if url.toLocalFile().lower().endswith(".csv"):
+                            event.acceptProposedAction()
+                            return True
+                event.ignore()
+                return True
+
+            elif event.type() == QEvent.Drop:
+                for url in event.mimeData().urls():
+                    filePath = url.toLocalFile()
+                    if filePath.lower().endswith(".csv"):   # add to user folder 
+                        userFolder = os.path.join("data", userdata[0])
+                        os.makedirs(userFolder, exist_ok=True)
+                        desinationPath = os.path.join(userFolder, os.path.basename(filePath))
+                        shutil.copy(filePath, desinationPath)
+                        self.dashboard.label.setText("CSV file accepted: " + filePath)
+                        event.acceptProposedAction()
+                    else:
+                        print("Rejected non‑CSV file:", filePath)
+                        event.ignore()
+                return True
+        return super().eventFilter(obj, event)
+
             
 #imports a csv from an application (Excel for now)
     def import_csv_from_app(self, userid, target_name, file_path):
