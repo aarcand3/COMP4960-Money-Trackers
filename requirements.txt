@@ -1,0 +1,10 @@
+# These files need to be installed via Command Shell to run the tracker!
+# The command for installing should go as follows:
+
+# Windows: py -m pip install -r requirements.txt
+# Mac: python3 -m pip3 install -r requirements.txt
+# Linux: pip3 install -r requirements.txt
+
+pandas
+PyQt5
+PyQtChart
