@@ -8,3 +8,5 @@ Our GUI will be able to take in a csv file or personal input and categorize to a
 Test User - John Doe
 userID: jdoe
 Password: password
+
+Several Third Party Libraries need to be installed prior to using the tracker. Please see requirements.txt for more information.
