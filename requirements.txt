@@ -5,6 +5,6 @@
 # Mac: python3 -m pip3 install -r requirements.txt
 # Linux: pip3 install -r requirements.txt
 
-pandas
-PyQt5
-PyQtChart
+pandas #dataframe library
+PyQt5 #gui library
+PyQtChart #gui for charts.
