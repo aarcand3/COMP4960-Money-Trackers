@@ -99,34 +99,81 @@ def logthis(logname):
     else:
         print("ERROR! Could not find: "+logname+" is it configured?")
 def add_new_debt(userid, card, amount, interest, due_date):
+    # Normalize inputs
+    card = card.strip().lower()
+    due_date = due_date.strip()
+    try:
+        amount = float(amount)
+        interest = float(interest)
+    except ValueError:
+        return  # Invalid numeric input; silently exit for GUI
+
+    # Ensure user folder exists
+    folder = f"data/{userid}"
+    os.makedirs(folder, exist_ok=True)
+    path = os.path.join(folder, "debt.csv")
+
+    # Load or initialize debt data
+    if os.path.exists(path):
+        df = pd.read_csv(path)
+    else:
+        df = pd.DataFrame(columns=["due_date", "card", "amount", "interest"])
+
+    # Normalize existing data for duplicate check
+    df["card"] = df["card"].astype(str).str.lower()
+    df["due_date"] = df["due_date"].astype(str).str.strip()
+
+    # Check for duplicate
+    duplicate = (
+        (df["card"] == card) &
+        (df["due_date"] == due_date) &
+        (df["amount"] == amount) &
+        (df["interest"] == interest)
+    ).any()
+
+    if not duplicate:
+        new_row = {
+            "due_date": due_date,
+            "card": card,
+            "amount": amount,
+            "interest": interest
+        }
+        df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
+        df.to_csv(path, index=False)
 
         debt_path = f"data/{userid}/debt.csv"
-
-        # Normalize inputs
-        card = str(card).strip().title()
-
-#function reads a user's debt CSV file
+#function to display the debt CSV file with monthly and yearly interest
 def load_debt_data(username):
-        csv_path = f"data/{username}/debt.csv"
-        debts = []
-        try:
-            with open(csv_path, 'r') as file:
-                reader = csv.DictReader(file)
-                for row in reader:
-                    vendor = row['card'].strip()
-                    balance = float(row['balance'])
-                    interest_str = row['interest'].strip().replace('%', '')  # ✅ Strip %
-                    interest = float(interest_str)
+    csv_path = f"data/{username}/debt.csv"
+    debts = []
+    try:
+        with open(csv_path, 'r') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                try:
+                    due_date = row['due_date'].strip()
+                    card = row['card'].strip()
+                    amount = float(row['amount'])
+                    interest = float(row['interest'])
+
+                    monthly = round(amount * (interest / 100) / 12, 2)
+                    annual = round(amount * (interest / 100), 2)
+
                     debts.append({
-                        'vendor': vendor,
-                        'balance': balance,
-                        'interest': interest
+                        'due_date': due_date,
+                        'card': card,
+                        'amount': amount,
+                        'interest': interest,
+                        'MonthlyInterest': monthly,
+                        'AnnualInterest': annual
                     })
-        except FileNotFoundError:
-            print(f"⚠️ Debt file not found for user: {username}")
-        except Exception as e:
-            print(f"⚠️ Error loading debt data for {username}: {e}")
-        return debts
+                except Exception as e:
+                    print(f"⚠️ Skipping row due to error: {e}")
+    except FileNotFoundError:
+        print(f"⚠️ Debt file not found for user: {username}")
+    except Exception as e:
+        print(f"⚠️ Error loading debt data for {username}: {e}")
+    return debts
 
 #Calculates total debt
 #sort the list by interest rate   
@@ -138,6 +185,59 @@ def summarize_debt(debts):
                 d['annual_interest'] = (d['balance'] * d['interest']) / 100
 
             return total_debt
+#function to add new bank account
+def add_new_bank_entry(userid, date, bank, balance):
+    # Normalize inputs
+    date = date.strip()
+    bank = bank.strip().title()
+    try:
+        balance = float(balance)
+    except ValueError:
+        print("⚠️ Invalid balance input.")
+        return
+
+    # Build user-specific path
+    folder = f"data/{userid}"
+    os.makedirs(folder, exist_ok=True)
+    path = os.path.join(folder, "accounts.csv")
+
+    # Create file with header if missing
+    if not os.path.exists(path):
+        with open(path, 'w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(['date', 'bank', 'balance'])
+
+    # Append new entry
+    with open(path, 'a', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow([date, bank, balance])
+        print(f" Bank entry added for {userid}: {bank} - ${balance:.2f}")
+
+# function read's account CSV file
+def load_account_data(userid):
+    filepath=f"data/{userid}/accounts.csv"
+    accounts = []
+    try:
+        with open(filepath, 'r') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                try:
+                    date = row['date'].strip()
+                    bank = row['bank'].strip()
+                    balance = float(row['balance'])
+                    accounts.append({
+                        'date': date,
+                        'bank': bank,
+                        'balance': balance
+                    })
+                except Exception as e:
+                    print(f"⚠️ Skipping row due to error: {e}")
+    except FileNotFoundError:
+        print(f"⚠️ Account file not found: {filepath}")
+    except Exception as e:
+        print(f"⚠️ Error loading account data: {e}")
+    return accounts
+
 
 # function Save or update a savings goal for a specific user.
 def saveCategoryGoal(userid, category, amount, due_date):
