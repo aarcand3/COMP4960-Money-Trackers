@@ -218,12 +218,23 @@
     <property name="geometry">
      <rect>
       <x>30</x>
-      <y>341</y>
+      <y>310</y>
       <width>481</width>
-      <height>211</height>
+      <height>121</height>
      </rect>
     </property>
    </widget>
+      <widget class="QTableView" name="goals_tableView">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>440</y>
+      <width>481</width>
+      <height>121</height>
+     </rect>
+    </property>
+   </widget>
+  </widget>
    <widget class="QLineEdit" name="lineEdit">
     <property name="geometry">
      <rect>

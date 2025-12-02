@@ -571,10 +571,26 @@ class MainDashBoard(QMainWindow):
             goals_model.setHorizontalHeaderLabels(headers)
 
 
-            self.dashboard.debt_tableView.setModel(goals_model)
+            self.dashboard.goals_tableView.setModel(goals_model)
+        except FileNotFoundError:
+            QMessageBox.warning(self, "Missing File", f"Could not find goals file")
+
+        debt_model = QStandardItemModel()
+        try:
+            debt = load_debt_data(username)
+            headers = ["Vendor", "Balance", "Interest"]
+            debt_model.setColumnCount(len(headers))
+            for vendor, amount, interest in debt:
+                row = [
+                QStandardItem(str(vendor)),
+                QStandardItem(str(amount)),
+                QStandardItem(f"{interest}%")
+                ]
+                debt_model.appendRow(row)
+            debt_model.setHorizontalHeaderLabels(headers)
+            self.dashboard.debt_tableView.setModel(debt_model)
         except FileNotFoundError:
             QMessageBox.warning(self, "Missing File", f"Could not find debt file")
-
 
     def create_chart(self, title, data_dict):
         series = QPieSeries()
