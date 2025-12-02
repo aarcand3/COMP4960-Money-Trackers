@@ -99,81 +99,34 @@ def logthis(logname):
     else:
         print("ERROR! Could not find: "+logname+" is it configured?")
 def add_new_debt(userid, card, amount, interest, due_date):
-    # Normalize inputs
-    card = card.strip().lower()
-    due_date = due_date.strip()
-    try:
-        amount = float(amount)
-        interest = float(interest)
-    except ValueError:
-        return  # Invalid numeric input; silently exit for GUI
-
-    # Ensure user folder exists
-    folder = f"data/{userid}"
-    os.makedirs(folder, exist_ok=True)
-    path = os.path.join(folder, "debt.csv")
-
-    # Load or initialize debt data
-    if os.path.exists(path):
-        df = pd.read_csv(path)
-    else:
-        df = pd.DataFrame(columns=["due_date", "card", "amount", "interest"])
-
-    # Normalize existing data for duplicate check
-    df["card"] = df["card"].astype(str).str.lower()
-    df["due_date"] = df["due_date"].astype(str).str.strip()
-
-    # Check for duplicate
-    duplicate = (
-        (df["card"] == card) &
-        (df["due_date"] == due_date) &
-        (df["amount"] == amount) &
-        (df["interest"] == interest)
-    ).any()
-
-    if not duplicate:
-        new_row = {
-            "due_date": due_date,
-            "card": card,
-            "amount": amount,
-            "interest": interest
-        }
-        df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
-        df.to_csv(path, index=False)
 
         debt_path = f"data/{userid}/debt.csv"
-#function to display the debt CSV file with monthly and yearly interest
+
+        # Normalize inputs
+        card = str(card).strip().title()
+
+#function reads a user's debt CSV file
 def load_debt_data(username):
-    csv_path = f"data/{username}/debt.csv"
-    debts = []
-    try:
-        with open(csv_path, 'r') as file:
-            reader = csv.DictReader(file)
-            for row in reader:
-                try:
-                    due_date = row['due_date'].strip()
-                    card = row['card'].strip()
-                    amount = float(row['amount'])
-                    interest = float(row['interest'])
-
-                    monthly = round(amount * (interest / 100) / 12, 2)
-                    annual = round(amount * (interest / 100), 2)
-
+        csv_path = f"data/{username}/debt.csv"
+        debts = []
+        try:
+            with open(csv_path, 'r') as file:
+                reader = csv.DictReader(file)
+                for row in reader:
+                    vendor = row['card'].strip()
+                    balance = float(row['balance'])
+                    interest_str = row['interest'].strip().replace('%', '')  # ✅ Strip %
+                    interest = float(interest_str)
                     debts.append({
-                        'due_date': due_date,
-                        'card': card,
-                        'amount': amount,
-                        'interest': interest,
-                        'MonthlyInterest': monthly,
-                        'AnnualInterest': annual
+                        'vendor': vendor,
+                        'balance': balance,
+                        'interest': interest
                     })
-                except Exception as e:
-                    print(f"⚠️ Skipping row due to error: {e}")
-    except FileNotFoundError:
-        print(f"⚠️ Debt file not found for user: {username}")
-    except Exception as e:
-        print(f"⚠️ Error loading debt data for {username}: {e}")
-    return debts
+        except FileNotFoundError:
+            print(f"⚠️ Debt file not found for user: {username}")
+        except Exception as e:
+            print(f"⚠️ Error loading debt data for {username}: {e}")
+        return debts
 
 #Calculates total debt
 #sort the list by interest rate   
@@ -185,59 +138,6 @@ def summarize_debt(debts):
                 d['annual_interest'] = (d['balance'] * d['interest']) / 100
 
             return total_debt
-#function to add new bank account
-def add_new_bank_entry(userid, date, bank, balance):
-    # Normalize inputs
-    date = date.strip()
-    bank = bank.strip().title()
-    try:
-        balance = float(balance)
-    except ValueError:
-        print("⚠️ Invalid balance input.")
-        return
-
-    # Build user-specific path
-    folder = f"data/{userid}"
-    os.makedirs(folder, exist_ok=True)
-    path = os.path.join(folder, "accounts.csv")
-
-    # Create file with header if missing
-    if not os.path.exists(path):
-        with open(path, 'w', newline='') as f:
-            writer = csv.writer(f)
-            writer.writerow(['date', 'bank', 'balance'])
-
-    # Append new entry
-    with open(path, 'a', newline='') as f:
-        writer = csv.writer(f)
-        writer.writerow([date, bank, balance])
-        print(f" Bank entry added for {userid}: {bank} - ${balance:.2f}")
-
-# function read's account CSV file
-def load_account_data(userid):
-    filepath=f"data/{userid}/accounts.csv"
-    accounts = []
-    try:
-        with open(filepath, 'r') as file:
-            reader = csv.DictReader(file)
-            for row in reader:
-                try:
-                    date = row['date'].strip()
-                    bank = row['bank'].strip()
-                    balance = float(row['balance'])
-                    accounts.append({
-                        'date': date,
-                        'bank': bank,
-                        'balance': balance
-                    })
-                except Exception as e:
-                    print(f"⚠️ Skipping row due to error: {e}")
-    except FileNotFoundError:
-        print(f"⚠️ Account file not found: {filepath}")
-    except Exception as e:
-        print(f"⚠️ Error loading account data: {e}")
-    return accounts
-
 
 # function Save or update a savings goal for a specific user.
 def saveCategoryGoal(userid, category, amount, due_date):
@@ -365,7 +265,7 @@ class LoginWindow (QMainWindow):
 
         with open(savings_file, mode="w", newline='') as f:
             writer = csv.writer(f)
-            writer.writerow(["UserID", "Category", "Ammount", "Deadline"]) #check with sonia?
+            writer.writerow(["UserID", "Category", "Ammount", "Deadline"]) 
 
         with open(accounts_file, mode="w", newline='') as f:
             writer = csv.writer(f)
@@ -397,10 +297,12 @@ class ChatBox(QDialog) :
         super().__init__()
         self.chatBox = Ui_Chat()
         self.chatBox.setupUi(self)   
-#        self.chatBox.sendButton.clicked.connect(self.sendChat)
+        self.chatBox.sendButton.clicked.connect(self.sendChat)
         self.chatBox.textEdit.setPlaceholderText("Type your message here...")
 
-#   def sendChat(self):
+    def sendChat(self):
+        text = self.chatBox.textEdit.text()
+
 
 class WarningBox(QDialog):
     def __init__(self, message):
@@ -441,6 +343,7 @@ class MainDashBoard(QMainWindow):
         self.dashboard.chatButton.clicked.connect(self.showChat)
         self.dashboard.frame.setAcceptDrops(True)
         self.dashboard.frame.installEventFilter(self)
+        self.dashboard.add_expense_button.clicked.connect(self.addExpense)
 
         self.setStyleSheet(f"""
         QWidget {{
@@ -474,7 +377,7 @@ class MainDashBoard(QMainWindow):
         self.dashboard.debt_progressBar.setValue(percentage)
 
         self.populate_accounts_from_purchases(self.dashboard.expense_comboBox, username )
-        self.dashboard.add_expense_button.clicked.connect(self.addExpense)
+
     def showChat (self):
         self.WarningBox = WarningBox("Warning. This Application is not responsible for any financial advice given. Please consult a professional for serious matters. By clicking ok you acknowledge responsibility for your own actions.")
         self.WarningBox.showWarning()
@@ -522,14 +425,15 @@ class MainDashBoard(QMainWindow):
         elif index == 3:
             for widget in self.dashboard.expense_group:
                 widget.show()
+                #self.dashboard.add_expense_button.clicked.connect(self.addExpense)
         elif index == 4:
             for widget in self.dashboard.savings_group:
                 widget.hide()    # need to replace for whatever we choose to add a savings goal?
         self.dashboard.expense_comboBox.currentIndexChanged.connect(self.on_dropdown_change)
 
-    def addExpense(self, userid):
+    def addExpense(self):
     # Manually input expenses to purchaces.csv
-        filepath = f"data/{userid}/purchases.csv"
+        filepath = f"data/{userdata[0]}/purchases.csv"
 
     # Makes sure the path is a valid path that exists
         os.makedirs(os.path.dirname(filepath), exist_ok=True)
@@ -540,43 +444,16 @@ class MainDashBoard(QMainWindow):
         amount = self.dashboard.ammount_edit.text().strip()
         expensedata = [date, card, category, amount]
         try:        
-            with open("data/userlist.csv", mode = "a", newline='') as file:
+            with open(filepath, mode = "a", newline="") as file:
                 writer = csv.writer(file)
                 writer.writerow(expensedata)
         except ValueError:
             print("Invalid amount. Please enter a numeric value.")
             return
+        #update expense table
+        self.load_widgets(userdata[0])
     
-    # Creates a dictionary to allow for appending.
-        expense_entry = {
-            "date": date,
-            "card": card,
-            "type": category,
-            "amount": amount
-        }
-    
-    # Creates dataframe
-        df = pd.DataFrame([expense_entry])
 
-    # Appends to csv file if it exists, creates one if it doesn't.
-        file_exists = os.path.exists(filepath)
-        if file_exists:
-            try:
-                df_existing = pd.read_csv(filepath)
-
-                # Ensures columns are consistent
-                if not all(col in df_existing.columns for col in df.columns):
-                    print("Warning: Column mismatch detected. Adjusting...")
-                    for col in df.columns:
-                        if col not in df_existing.columns:
-                            df_existing[col] = None
-                    df_existing = df_existing[df.columns]
-
-                df.to_csv(filepath, mode="a", header=False, index=False)
-            except Exception as e:
-                print(f"Error appending to existing CSV: {e}")
-        else:
-            df.to_csv(filepath, mode="w", index=False)
     def eventFilter(self, obj, event): #accept csv files only 
         if obj == self.dashboard.frame:
             if event.type() == QEvent.DragEnter: #need qevent to accept drops
