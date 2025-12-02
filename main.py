@@ -185,7 +185,7 @@ def getAllGoalsWithProgress(userid):
 
         enriched_goals.append((category, amount, due_date, progress_percent))  #needed tuple
 
-        return enriched_goals
+    return enriched_goals
 
 def getTotalSavingsProgress(userid):
     accounts_path = f"data/{userid}/accounts.csv"
@@ -566,9 +566,10 @@ class MainDashBoard(QMainWindow):
                 QStandardItem(str(amount)),
                 QStandardItem(str(due_date)),
                 QStandardItem(f"{progress_percent}%")
-            ]
+                ]
+                goals_model.appendRow(row)
             goals_model.setHorizontalHeaderLabels(headers)
-            goals_model.appendRow(row)
+
 
             self.dashboard.debt_tableView.setModel(goals_model)
         except FileNotFoundError:
