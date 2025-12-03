@@ -299,11 +299,13 @@ class ChatBox(QDialog) :
         self.chatBox.setupUi(self)   
         self.chatBox.sendButton.clicked.connect(self.sendChat)
         self.chatBox.textEdit.setPlaceholderText("Type your message here...")
+        self.chatBox.update()
 
     def sendChat(self):
-        text = self.chatBox.textEdit.text()
-
-
+        text = self.chatBox.textEdit.text() # get text to send 
+    def update(self):
+        chat = self.chatBox.textEdit.text() #add text to window
+        self.chatBox.chatWindow.setText(chat) 
 class WarningBox(QDialog):
     def __init__(self, message):
         super().__init__()
