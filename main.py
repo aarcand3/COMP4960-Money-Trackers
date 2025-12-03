@@ -344,6 +344,7 @@ class MainDashBoard(QMainWindow):
         self.dashboard.frame.setAcceptDrops(True)
         self.dashboard.frame.installEventFilter(self)
         self.dashboard.add_expense_button.clicked.connect(self.addExpense)
+        self.dashboard.add_account_button.clicked.connect(self.addAccount)
 
         self.setStyleSheet(f"""
         QWidget {{
@@ -377,7 +378,12 @@ class MainDashBoard(QMainWindow):
         self.dashboard.debt_progressBar.setValue(percentage)
 
         self.populate_accounts_from_purchases(self.dashboard.expense_comboBox, username )
-
+    def addAccount(self):
+        account = self.dashboard.add_account_name.text()
+        self.dashboard.expense_comboBox.addItem(account)
+    def addNewSavings (self):
+        ammount = self.dashboard.saving_ammount_edit.text.strip()
+        date = self.dashboard.savings_category.text.strip()
     def showChat (self):
         self.WarningBox = WarningBox("Warning. This Application is not responsible for any financial advice given. Please consult a professional for serious matters. By clicking ok you acknowledge responsibility for your own actions.")
         self.WarningBox.showWarning()
@@ -421,14 +427,14 @@ class MainDashBoard(QMainWindow):
                 self.dashboard.frame.setAcceptDrops(True)
         elif index == 2:
             for widget in self.dashboard.add_account_group:
-                widget.hide()#replace with add account ?
+                widget.show()
         elif index == 3:
             for widget in self.dashboard.expense_group:
                 widget.show()
-                #self.dashboard.add_expense_button.clicked.connect(self.addExpense)
+
         elif index == 4:
             for widget in self.dashboard.savings_group:
-                widget.hide()    # need to replace for whatever we choose to add a savings goal?
+                widget.show()    # need to replace for whatever we choose to add a savings goal?
         self.dashboard.expense_comboBox.currentIndexChanged.connect(self.on_dropdown_change)
 
     def addExpense(self):

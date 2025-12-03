@@ -78,13 +78,19 @@ class Ui_MainWindow(object):
         self.debt_tableView.setGeometry(QtCore.QRect(30, 310, 481, 121))
         self.debt_tableView.setObjectName("debt_tableView")
         self.add_expense_button = QtWidgets.QPushButton(self.centralwidget)
-        self.add_expense_button.setGeometry(QtCore.QRect(400, 270, 90, 32))
+        self.add_expense_button.setGeometry(QtCore.QRect(400, 270, 90, 38))
         self.add_expense_button.setObjectName("add_expense_button")
+        self.add_account_button = QtWidgets.QPushButton(self.centralwidget)
+        self.add_account_button.setGeometry(QtCore.QRect(380,240,131,32))
+        self.add_account_button.setObjectName("add_account_button")
+        self.add_account_name = QtWidgets.QLineEdit(self.centralwidget)
+        self.add_account_name.setGeometry(QtCore.QRect(160, 240, 161, 28))
+        self.add_account_name.setObjectName("add_account_name")
         self.add_saving_button = QtWidgets.QPushButton(self.centralwidget)
-        self.add_saving_button.setGeometry(QtCore.QRect(400, 270, 90, 32))
+        self.add_saving_button.setGeometry(QtCore.QRect(400, 270, 90, 38))
         self.add_saving_button.setObjectName("add_saving_button")
         self.type_lineEdit = QtWidgets.QLineEdit(self.centralwidget)
-        self.type_lineEdit.setGeometry(QtCore.QRect(30, 240, 113, 28))
+        self.type_lineEdit.setGeometry(QtCore.QRect(30, 240, 130, 28))
         self.type_lineEdit.setObjectName("type_lineEdit")
         self.expense_dateEdit = QtWidgets.QDateEdit(self.centralwidget)
         self.expense_dateEdit.setGeometry(QtCore.QRect(380, 240, 110, 29))
@@ -104,9 +110,6 @@ class Ui_MainWindow(object):
         self.ammount_label = QtWidgets.QLabel(self.centralwidget)
         self.ammount_label.setGeometry(QtCore.QRect(250,220,63,20))
         self.ammount_label.setObjectName("ammount_label")
-        self.saving_ammount_label = QtWidgets.QLabel(self.centralwidget)
-        self.saving_ammount_label.setGeometry(QtCore.QRect(250,220,63,20))
-        self.saving_ammount_label.setObjectName("ammount_label")
         self.type_label = QtWidgets.QLabel(self.centralwidget)
         self.type_label.setGeometry(30,220,63,20)
         self.type_label.setObjectName("type_label")
@@ -135,10 +138,20 @@ class Ui_MainWindow(object):
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
         self.menubar.addAction(self.menuMoneyTracker.menuAction())
+        self.savings_label = QtWidgets.QLabel(self.centralwidget)
+        self.savings_label.setGeometry(QtCore.QRect(250,220,63,20))
+        self.savings_label.setObjectName("savings_label")
+        self.savings_category = QtWidgets.QLineEdit(self.centralwidget)
+        self.savings_category.setGeometry(32,240,151,28)
+        self.savings_category.setObjectName("savings_category")
+        self.save_category_label = QtWidgets.QLabel(self.centralwidget)
+        self.save_category_label.setGeometry(30,220,63,20)
+        self.save_category_label.setObjectName("savings_cat_label")
         self.csv_group = {self.frame, self.pushButton}
+
         self.expense_group = {self.ammount_edit, self.ammount_label, self.account_label, self.date_label, self.expense_dateEdit, self.add_expense_button, self.type_lineEdit, self.type_label, self.expense_comboBox}
-        self.savings_group = {self.saving_ammount_edit, self.saving_ammount_label, self.saving_date_label, self.saving_dateEdit, self.add_saving_button}
-        self.add_account_group = {self.account_label, self.expense_comboBox, self.add_expense_button}
+        self.savings_group = {self.saving_ammount_edit, self.savings_label, self.saving_date_label, self.saving_dateEdit, self.add_saving_button, self.save_category_label, self.savings_category}
+        self.add_account_group = {self.account_label, self.add_account_name, self.add_account_button}
         self.retranslateUi(MainWindow)
 
         self.tracking_tabWidget.setCurrentIndex(1)
@@ -168,3 +181,6 @@ class Ui_MainWindow(object):
         self.type_label.setText(_translate("MainWindow", "Type:"))
         self.date_label.setText(_translate("MainWindow", "Date:"))
         self.menuMoneyTracker.setTitle(_translate("MainWindow", "MoneyTracker"))
+        self.add_account_button.setText(_translate("MainWindow", "Add Account"))
+        self.savings_label.setText(_translate("MainWindow", "Savings Amount"))
+        self.save_category_label.setText(_translate("MainWindow", "Category"))
