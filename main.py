@@ -304,18 +304,26 @@ class ChatBox(QDialog) :
         welcomeMessage =  ("Welcome to chat")
         self.updateChat(welcomeMessage)
         self.chatBox.sendButton.clicked.connect(self.sendChat)
-        self.chatBox.textEdit.setPlaceholderText("Type your message here...")
+        self.chatBox.lineEdit.setPlaceholderText("Type your message here...")
 
 
     def sendChat(self):
-        text = self.chatBox.textEdit.text() # get text to send 
+        text = self.chatBox.lineEdit.text().strip() # get text to send 
         response = chat.startChat(text)
         self.updateChat(response)
 
     def updateChat(self, newResponse):
-        self.response.append(newResponse) #add text to window
-        for i in self.response:
-            self.chatBox.chatWindow.setText(self.response[i]) 
+         #add text to window
+        if newResponse:
+            label = QtWidgets.QLabel(newResponse)
+            label.setWordWrap(True)  # wrap long messages
+            self.chatBox.chatLayout.insertWidget(self.chatBox.chatLayout.count()-1, label)
+            self.chatBox.lineEdit.clear()
+
+            # Auto-scroll to bottom
+        self.chatBox.chatWindow.verticalScrollBar().setValue(
+                self.chatBox.chatWindow.verticalScrollBar().maximum())
+
 class WarningBox(QDialog):
     def __init__(self, message):
         super().__init__()

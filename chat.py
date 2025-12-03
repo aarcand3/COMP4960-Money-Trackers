@@ -1,11 +1,11 @@
 import requests
-def startChat():
+def startChat(userMessage):
     URL = 'http://jld.ddns.net:11434/api/chat'
     model = 'gemma3:12b'
     messages = []
 
     while True:
-        user_input = input(">>> ")
+        user_input = userMessage
         message = {
             "role": "user",
             "content": user_input
