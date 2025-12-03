@@ -382,8 +382,23 @@ class MainDashBoard(QMainWindow):
         account = self.dashboard.add_account_name.text()
         self.dashboard.expense_comboBox.addItem(account)
     def addNewSavings (self):
+        filepath = f"data/{userdata[0]}/goals.csv"
         ammount = self.dashboard.saving_ammount_edit.text.strip()
-        date = self.dashboard.savings_category.text.strip()
+        category= self.dashboard.savings_category.text.strip()
+        date = self.dashboard.saving_dateEdit.test.strip()
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+    
+        goaldata = [date, category, ammount]
+        try:        
+            with open(filepath, mode = "a", newline="") as file:
+                writer = csv.writer(file)
+                writer.writerow(goaldata)
+        except ValueError:
+            print("Invalid amount. Please enter a numeric value.")
+            return
+        #update table
+        self.load_widgets(userdata[0])
+
     def showChat (self):
         self.WarningBox = WarningBox("Warning. This Application is not responsible for any financial advice given. Please consult a professional for serious matters. By clicking ok you acknowledge responsibility for your own actions.")
         self.WarningBox.showWarning()
