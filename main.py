@@ -279,6 +279,8 @@ class LoginWindow (QMainWindow):
         with open("data/userlist.csv", mode="r") as data:
             csv_reader = csv.reader(data)
             for row in csv_reader:
+                if len(row) < 4:
+                   continue
                 if row[0] == userdata[0] and row[1] == userdata[1]:
                     importUser(userdata[0])
                     userdata[0] = row[0] # UserID
