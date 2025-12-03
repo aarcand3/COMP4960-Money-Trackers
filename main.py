@@ -40,7 +40,7 @@ def importUser(userid):
         iteration = 0
         for row in csv_reader:
             if iteration != 0:
-                totaldebt += float(row[3])
+                totaldebt += float(row[2])
             iteration += 1
         usertotals[2] = totaldebt
     # Calculate totalbalence from accounts.csv
@@ -108,27 +108,31 @@ def add_new_debt(userid, card, amount, interest, due_date):
 
 #function reads a user's debt CSV file
 def load_debt_data(username):
-        csv_path = f"data/{username}/debt.csv"
-        debts = []
-        try:
-            with open(csv_path, 'r') as file:
-                reader = csv.DictReader(file)
-                for row in reader:
+    csv_path = f"data/{username}/debt.csv"
+    debts = []
+    try:
+        with open(csv_path, 'r', newline='', encoding='utf-8') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                try:
                     vendor = row['card'].strip()
-                    balance = float(row['balance'])
-                    interest_str = row['interest'].strip().replace('%', '')  # ✅ Strip %
+                    amount = float(row['amount'])   # ✅ use 'amount' instead of 'balance'
+                    interest_str = row['interest'].strip().replace('%', '')
                     interest = float(interest_str)
+
                     debts.append({
                         'vendor': vendor,
-                        'balance': balance,
+                        'amount': amount,
                         'interest': interest
                     })
-        except FileNotFoundError:
-            print(f"⚠️ Debt file not found for user: {username}")
-        except Exception as e:
-            print(f"⚠️ Error loading debt data for {username}: {e}")
-        return debts
+                except Exception as e:
+                    print(f"⚠️ Skipping row due to error: {e}")
+    except FileNotFoundError:
+        print(f"⚠️ Debt file not found for user: {username}")
+    except Exception as e:
+        print(f"⚠️ Error loading debt data for {username}: {e}")
 
+    return debts
 #Calculates total debt
 #sort the list by interest rate   
 
