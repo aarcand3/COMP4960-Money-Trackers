@@ -19,6 +19,7 @@ from chatbox import Ui_Dialog as Ui_Chat
 from login import Ui_LoginWindow
 from dashboard import Ui_MainWindow
 from datetime import datetime
+import chat 
 import sys
 import os
 
@@ -298,16 +299,23 @@ class ChatBox(QDialog) :
     def __init__(self):
         super().__init__()
         self.chatBox = Ui_Chat()
-        self.chatBox.setupUi(self)   
+        self.chatBox.setupUi(self)  
+        self.response = []
+        welcomeMessage =  ("Welcome to chat")
+        self.updateChat(welcomeMessage)
         self.chatBox.sendButton.clicked.connect(self.sendChat)
         self.chatBox.textEdit.setPlaceholderText("Type your message here...")
-        self.chatBox.update()
+
 
     def sendChat(self):
         text = self.chatBox.textEdit.text() # get text to send 
-    def update(self):
-        chat = self.chatBox.textEdit.text() #add text to window
-        self.chatBox.chatWindow.setText(chat) 
+        response = chat.startChat(text)
+        self.updateChat(response)
+
+    def updateChat(self, newResponse):
+        self.response.append(newResponse) #add text to window
+        for i in self.response:
+            self.chatBox.chatWindow.setText(self.response[i]) 
 class WarningBox(QDialog):
     def __init__(self, message):
         super().__init__()
@@ -315,19 +323,19 @@ class WarningBox(QDialog):
         self.layout = QVBoxLayout()
         self.setModal(True)
         self.label = QLabel(message)
-        self.layout.addWidget(self.label)
         self.checkbox = QCheckBox("I understand the risks")
         self.checkbox.stateChanged.connect(self.toggle_ok_button)
         self.button = QPushButton("OK")
         self.button.setEnabled(False)
-        self.layout.addWidget(self.button)
+        self.layout.addWidget(self.label)
         self.layout.addWidget(self.checkbox)
+        self.layout.addWidget(self.button)
         self.setLayout(self.layout)
     
     def toggle_ok_button(self, state):
         self.button.setEnabled(state == Qt.Checked)
         self.chat = ChatBox()
-        self.button.clicked.connect(self.chat.show)
+        self.button.clicked.connect(self.proceed_to_chat)
     def proceed_to_chat(self):
         self.close()
         self.chat = ChatBox()
