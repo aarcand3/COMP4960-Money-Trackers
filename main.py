@@ -345,6 +345,7 @@ class MainDashBoard(QMainWindow):
         self.dashboard.frame.installEventFilter(self)
         self.dashboard.add_expense_button.clicked.connect(self.addExpense)
         self.dashboard.add_account_button.clicked.connect(self.addAccount)
+        self.dashboard.add_saving_button.clicked.connect(self.addNewSavings)
 
         self.setStyleSheet(f"""
         QWidget {{
