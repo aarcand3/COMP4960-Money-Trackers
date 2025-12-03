@@ -404,9 +404,9 @@ class MainDashBoard(QMainWindow):
         self.dashboard.expense_comboBox.addItem(account)
     def addNewSavings (self):
         filepath = f"data/{userdata[0]}/goals.csv"
-        ammount = self.dashboard.saving_ammount_edit.text.strip()
+        ammount = self.dashboard.saving_ammount_edit.text()
         category= self.dashboard.savings_category.text.strip()
-        date = self.dashboard.saving_dateEdit.test.strip()
+        date = self.dashboard.saving_dateEdit.text.strip()
         os.makedirs(os.path.dirname(filepath), exist_ok=True)
     
         goaldata = [date, category, ammount]
@@ -452,11 +452,16 @@ class MainDashBoard(QMainWindow):
         for widget in self.dashboard.add_account_group:
                 widget.hide()
         for widget in self.dashboard.savings_group:
-                widget.hide()
-
+                widget.hide() 
         if index == 0:
+            for widget in self.dashboard.csv_group:
+                widget.hide()
             for widget in self.dashboard.expense_group:
                 widget.hide()
+            for widget in self.dashboard.add_account_group:
+                widget.hide()
+            for widget in self.dashboard.savings_group:
+                widget.hide()            
         elif index == 1:
             for widget in self.dashboard.csv_group:
                 widget.show()
@@ -619,8 +624,8 @@ class MainDashBoard(QMainWindow):
 
         debt_model = QStandardItemModel()
         try:
-            debt = load_debt_data(username)
-            headers = ["Vendor", "Balance", "Interest"]
+            debt = load_debt_data(userdata[0])
+            headers = ["Vendor", "Amount", "Interest"]
             debt_model.setColumnCount(len(headers))
             for vendor, amount, interest in debt:
                 row = [
@@ -693,6 +698,9 @@ class MainDashBoard(QMainWindow):
                 self.dashboard.tracking_tabWidget.removeTab(i)
 
     def logout(self):
+        userdata.clear()
+        self.window = LoginWindow()
+        self.window.show()
         self.close()
 
 
