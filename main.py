@@ -120,11 +120,7 @@ def load_debt_data(username):
                     interest_str = row['interest'].strip().replace('%', '')
                     interest = float(interest_str)
 
-                    debts.append({
-                        'vendor': vendor,
-                        'amount': amount,
-                        'interest': interest
-                    })
+                    debts.append((vendor, amount,interest))
                 except Exception as e:
                     print(f"⚠️ Skipping row due to error: {e}")
     except FileNotFoundError:
@@ -188,7 +184,7 @@ def getAllGoalsWithProgress(userid):
         progress_percent = round((total_balance / amount) * 100, 2) if amount > 0 else 0
 
 
-        enriched_goals.append((category, amount, due_date, progress_percent))  #needed tuple
+        enriched_goals.append((category, amount, due_date, progress_percent))  #needed this format
 
     return enriched_goals
 
