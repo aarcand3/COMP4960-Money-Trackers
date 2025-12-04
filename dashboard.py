@@ -89,9 +89,9 @@ class Ui_MainWindow(object):
         self.add_saving_button = QtWidgets.QPushButton(self.centralwidget)
         self.add_saving_button.setGeometry(QtCore.QRect(400, 270, 90, 38))
         self.add_saving_button.setObjectName("add_saving_button")
-        self.type_lineEdit = QtWidgets.QLineEdit(self.centralwidget)
-        self.type_lineEdit.setGeometry(QtCore.QRect(30, 240, 130, 28))
-        self.type_lineEdit.setObjectName("type_lineEdit")
+        self.category_comboBox = QtWidgets.QComboBox(self.centralwidget)
+        self.category_comboBox.setGeometry(QtCore.QRect(30, 240, 130, 28))
+        self.category_comboBox.setObjectName("category_comboBox")
         self.expense_dateEdit = QtWidgets.QDateEdit(self.centralwidget)
         self.expense_dateEdit.setGeometry(QtCore.QRect(380, 240, 110, 29))
         self.expense_dateEdit.setObjectName("expense_dateEdit")
@@ -148,8 +148,13 @@ class Ui_MainWindow(object):
         self.save_category_label.setGeometry(30,220,63,20)
         self.save_category_label.setObjectName("savings_cat_label")
         self.csv_group = {self.frame, self.pushButton}
-
-        self.expense_group = {self.ammount_edit, self.ammount_label, self.account_label, self.date_label, self.expense_dateEdit, self.add_expense_button, self.type_lineEdit, self.type_label, self.expense_comboBox}
+        self.budget_button = QtWidgets.QPushButton(self.centralwidget)
+        self.budget_button.setGeometry(30,670,115,29)
+        self.budget_button.setObjectName("budget_button")
+        self.tableLabel = QtWidgets.QLabel(self.centralwidget)
+        self.tableLabel.setGeometry(30,300,471,20)
+        self.tableLabel.setObjectName("tableLabel")
+        self.expense_group = {self.ammount_edit, self.ammount_label, self.account_label, self.date_label, self.expense_dateEdit, self.add_expense_button, self.category_comboBox, self.type_label, self.expense_comboBox}
         self.savings_group = {self.saving_ammount_edit, self.savings_label, self.saving_date_label, self.saving_dateEdit, self.add_saving_button, self.save_category_label, self.savings_category}
         self.add_account_group = {self.account_label, self.add_account_name, self.add_account_button}
         self.retranslateUi(MainWindow)
@@ -166,6 +171,15 @@ class Ui_MainWindow(object):
         self.userchoice_comboBox.setItemText(2, _translate("MainWindow", "Add New Account"))
         self.userchoice_comboBox.setItemText(3, _translate("MainWindow", "Manually Input a Transaction"))
         self.userchoice_comboBox.setItemText(4, _translate("MainWindow", "Add New Savings Goal"))
+        self.category_comboBox.setItemText(0, _translate("MainWindow", "Select"))
+        self.category_comboBox.setItemText(1, _translate("MainWindow", "Housing"))
+        self.category_comboBox.setItemText(2, _translate("MainWindow", "Food"))
+        self.category_comboBox.setItemText(3, _translate("MainWindow", "Transport"))
+        self.category_comboBox.setItemText(4, _translate("MainWindow", "Personal Care"))
+        self.category_comboBox.setItemText(5, _translate("MainWindow", "Savings"))
+        self.category_comboBox.setItemText(6, _translate("MainWindow", "Debt Repayment"))
+        self.category_comboBox.setItemText(7, _translate("MainWindow", "Other"))
+        
         self.update_pushButton.setText(_translate("MainWindow", "Update"))
         self.chatButton.setText(_translate("MainWindow", "Chat"))
         self.add_expense_button.setText(_translate("MainWindow","Add Expense"))
@@ -184,3 +198,4 @@ class Ui_MainWindow(object):
         self.add_account_button.setText(_translate("MainWindow", "Add Account"))
         self.savings_label.setText(_translate("MainWindow", "Savings Amount"))
         self.save_category_label.setText(_translate("MainWindow", "Category"))
+        self.budget_button.setText(_translate("MainWindow", "Example Budget"))

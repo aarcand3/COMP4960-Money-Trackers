@@ -25,12 +25,12 @@ import os
 
 userdata = ["userid","userpass","firstname","lastname"]
 usertotals = ["networth", "totalbalence", "totaldebt", "totalincome"]
-
+categorytotals = ["Housing", "Food", "Transport", "Personal Care", "Savings", "Debt Repay", "Other"]
 
 # Functions
 def importUser(userid):
-# Updates the users data in both the program var & the CSV
     global usertotals
+# Updates the users data in both the program var & the CSV
     totaldebt = 0
     totalincome = 0
     totalbalence = 0
@@ -63,6 +63,33 @@ def importUser(userid):
         usertotals[3] = totalincome
     # Calculate Networth by subtraacting totaldebt from totalbalence
     usertotals[0] = totalbalence - totaldebt
+
+def getBudget():
+    preferredTotals = ["housing", "Food", "Transport", "Personal Care", "Savings", "Debt minimums", "Other"]
+    preferredTotals[0] = usertotals[3]*0.3 #housing
+    preferredTotals[1] = 400  #food
+    preferredTotals[2] = usertotals[3]*.2 #transportation
+    preferredTotals[3] = 200  # personal care
+    preferredTotals[4] = usertotals[3] * 0.1 #savings
+    preferredTotals[5] = usertotals[2] *0.08 # debt repayment
+    preferredTotals[6] = usertotals[3]*0.2 #other
+    importUser(userdata[0])
+    income = usertotals[3]
+    networth = usertotals[0]
+
+    budget = {
+        "Income": round(income),
+        "Housing": round(preferredTotals[0], 2),
+        "Food": round(preferredTotals[1], 2),
+        "Transport": round(preferredTotals[2], 2),
+        "Personal Care": round(preferredTotals[3], 2),
+        "Savings": round(preferredTotals[4], 2),
+        "Debt Repayment": round(preferredTotals[5], 2),
+        "Discretionary": round(preferredTotals[6], 2)
+    }
+
+    return budget
+
 
 def logthis(logname):
     # 
@@ -99,12 +126,6 @@ def logthis(logname):
         
     else:
         print("ERROR! Could not find: "+logname+" is it configured?")
-def add_new_debt(userid, card, amount, interest, due_date):
-
-        debt_path = f"data/{userid}/debt.csv"
-
-        # Normalize inputs
-        card = str(card).strip().title()
 
 #function reads a user's debt CSV file
 def load_debt_data(username):
@@ -137,7 +158,6 @@ def summarize_debt(debts):
             for d in debts:
                 d['monthly_interest'] = (d['balance'] * d['interest']) / 12 / 100
                 d['annual_interest'] = (d['balance'] * d['interest']) / 100
-
             return total_debt
 
 # function Save or update a savings goal for a specific user.
@@ -366,6 +386,7 @@ class MainDashBoard(QMainWindow):
         self.dashboard.add_expense_button.clicked.connect(self.addExpense)
         self.dashboard.add_account_button.clicked.connect(self.addAccount)
         self.dashboard.add_saving_button.clicked.connect(self.addNewSavings)
+        self.dashboard.budget_button.clicked.connect(self.showBudget)
 
         self.setStyleSheet(f"""
         QWidget {{
@@ -423,6 +444,26 @@ class MainDashBoard(QMainWindow):
     def showChat (self):
         self.WarningBox = WarningBox("Warning. This Application is not responsible for any financial advice given. Please consult a professional for serious matters. By clicking ok you acknowledge responsibility for your own actions.")
         self.WarningBox.showWarning()
+    def showBudget(self):
+        self.dashboard.tableLabel.setText("This is a sample budget to be used for educational purposes only. ")
+        self.dashboard.budget_button.setText("Debt Table")
+      #  self.dashboard.goals_tableView.setParent(None)
+        budget_model = getBudget()
+        table = QStandardItemModel()
+        table.setColumnCount(2)
+        table.setRowCount(len(budget_model))
+        table.setHorizontalHeaderLabels(["Category", "Amount"])
+
+        for category, amount in budget_model.items():
+                if not None:
+                    row = [
+                    QStandardItem(str(category)),
+                    QStandardItem(str(amount)),
+                    ]
+                    table.appendRow(row)
+                else:
+                    pass
+        self.dashboard.debt_tableView.setModel(table)
 
     def populate_accounts_from_purchases(self, combo_box, userid):
         combo_box.clear()
@@ -487,7 +528,7 @@ class MainDashBoard(QMainWindow):
     
         date = self.dashboard.expense_dateEdit.text().strip()
         card = self.dashboard.expense_comboBox.currentText().strip()
-        category = self.dashboard.type_lineEdit.text().strip()
+        category = self.dashboard.category_comboBox.currentText().strip()
         amount = self.dashboard.ammount_edit.text().strip()
         expensedata = [date, card, category, amount]
         try:        
@@ -589,6 +630,7 @@ class MainDashBoard(QMainWindow):
             }
 
     def load_widgets(self, username):
+        self.dashboard.tableLabel.setText("All Debt and All savings goals. ")
         model = QStandardItemModel()
         try:
             with open(f"data/{username}/purchases.csv", mode="r") as file:
