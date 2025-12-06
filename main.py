@@ -161,9 +161,6 @@ def summarize_debt(debts):
             return total_debt
 
 # function Save or update a savings goal for a specific user.
-import os
-import pandas as pd
-from datetime import datetime
 
 def saveCategoryGoal(userid, category, amount, due_date):
     try:
@@ -173,31 +170,45 @@ def saveCategoryGoal(userid, category, amount, due_date):
         except (ValueError, TypeError):
             return {"error": f"Invalid goal amount: {amount}"}
 
-        # Validate date format (DD-MM-YYYY)
-        try:
-            parsed_date = datetime.strptime(due_date.strip(), "%d-%m-%Y").date()
-            due_date = parsed_date.strftime("%d-%m-%Y")  # normalize format
-        except (ValueError, TypeError):
+        # Normalize date format (accept MM/DD/YYYY or DD-MM-YYYY, output YYYY-MM-DD)
+        parsed_date = None
+        for fmt in ("%m/%d/%Y", "%d-%m-%Y", "%Y-%m-%d"):
+            try:
+                parsed_date = datetime.strptime(due_date.strip(), fmt)
+                break
+            except ValueError:
+                continue
+        if not parsed_date:
             return {"error": f"Invalid due date format: {due_date}"}
+        due_date = parsed_date.strftime("%Y-%m-%d")
 
+        # Path setup
         path = f"data/{userid}/goals.csv"
         os.makedirs(os.path.dirname(path), exist_ok=True)
 
+        # Load or initialize DataFrame
         if os.path.exists(path):
             df = pd.read_csv(path)
         else:
             df = pd.DataFrame(columns=["Category", "GoalAmount", "DueDate"])
 
-        # Normalize column names in case of casing issues
-        df.columns = [col.strip().lower() for col in df.columns]
-        df.rename(columns={"category": "Category", "goalamount": "GoalAmount", "duedate": "DueDate"}, inplace=True)
+        # Ensure consistent headers
+        df = df.rename(
+            columns={
+                "category": "Category",
+                "goalamount": "GoalAmount",
+                "duedate": "DueDate"
+            }
+        )
 
-        if category in df["Category"].values:
+        # Update or insert
+        if "Category" in df.columns and category in df["Category"].values:
             df.loc[df["Category"] == category, ["GoalAmount", "DueDate"]] = [amount, due_date]
         else:
             new_row = pd.DataFrame([{"Category": category, "GoalAmount": amount, "DueDate": due_date}])
             df = pd.concat([df, new_row], ignore_index=True)
 
+        # Save back
         df.to_csv(path, index=False)
         return True
 
@@ -267,6 +278,37 @@ def getTotalSavingsProgress(userid):
 
     total_progress = round((total_balance / total_goal_amount) * 100, 2)
     return total_progress
+
+def create_new_user_account(userid, firstname, lastname, password, confirm_password):
+    # Basic validation
+    if not all([userid, firstname, lastname, password, confirm_password]):
+        return {"error": "All fields are required."}
+
+    if password != confirm_password:
+        return {"error": "Passwords do not match."}
+
+    if len(password) < 6:
+        return {"error": "Password must be at least 6 characters."}
+
+    if not re.match(r"^[a-zA-Z0-9_]+$", userid):
+        return {"error": "User ID must be alphanumeric (underscores allowed)."}
+
+    # File path setup
+    user_dir = f"data/{userid}"
+    user_file = f"{user_dir}/user.csv"
+
+    if os.path.exists(user_file):
+        return {"error": "User ID already exists."}
+
+    try:
+        os.makedirs(user_dir, exist_ok=True)
+        with open(user_file, mode="w", newline="") as file:
+            writer = csv.writer(file)
+            writer.writerow(["UserID", "FirstName", "LastName", "Password"])
+            writer.writerow([userid, firstname, lastname, password])
+        return {"success": f"Account created for {userid}."}
+    except Exception as e:
+        return {"error": str(e)}
 #
 # login window and validation
 class LoginWindow (QMainWindow):
@@ -277,36 +319,81 @@ class LoginWindow (QMainWindow):
 
         self.ui.login_button.clicked.connect(self.check_login)
         self.ui.createaccount_button.clicked.connect(self.create_user)
+
+
     def create_user(self):
-    ##creating user
-        username = self.ui.usernameEdit.text().strip()
+        # Collect input from GUI
+        userid = self.ui.usernameEdit.text().strip()
         firstname = self.ui.firstnameEdit.text().strip()
         lastname = self.ui.lastnameEdit.text().strip()
         password = self.ui.passwordEdit.text().strip()
         confirm = self.ui.confirmEdit.text().strip()
 
+        # Validate input
+        if not all([userid, firstname, lastname, password, confirm]):
+            QMessageBox.warning(self, "Invalid", "All fields are required.")
+            return
+
         if password != confirm:
             QMessageBox.warning(self, "Invalid", "Passwords do not match.")
             return
 
-        userdata = [username, password, firstname, lastname,]
+        if len(password) < 6:
+            QMessageBox.warning(self, "Invalid", "Password must be at least 6 characters.")
+            return
 
-        with open("data/userlist.csv", mode="r") as data:
-            csv_reader = csv.reader(data)
-            for row in csv_reader:
-                if row[0] == username:
-                    QMessageBox.warning(self, "Cannot Create User.", "User already exists.")
-                    return
-                else:
-                    with open("data/userlist.csv", mode = "a", newline='') as file:
-                        writer = csv.writer(file)
-                        writer.writerow(userdata)
-                    logthis("login.log")
-                    self.createfiles(username)
-                    self.dashboard_window= MainDashBoard()
-                    self.dashboard_window.logged_in(username)
-                    self.dashboard_window.show()
-                    self.close()
+        # Check for existing user in userlist.csv
+        try:
+            with open("data/userlist.csv", mode="r") as data:
+                csv_reader = csv.reader(data)
+                for row in csv_reader:
+                    if not row or len(row) < 1:
+                        continue
+                    if row[0] == userid:
+                        QMessageBox.warning(self, "Cannot Create User", "User already exists.")
+                        return
+        except FileNotFoundError:
+            pass  # userlist.csv doesn't exist yet — will be created below
+
+        # Save new user to userlist.csv
+        try:
+            with open("data/userlist.csv", mode="a", newline='') as file:
+                writer = csv.writer(file)
+                writer.writerow([userid, password, firstname, lastname])
+        except Exception as e:
+            QMessageBox.warning(self, "Error", f"Failed to write userlist: {e}")
+            return
+
+        # Create user folder and starter files
+        try:
+            user_dir = f"data/{userid}"
+            os.makedirs(user_dir, exist_ok=True)
+
+            starter_files = {
+                "accounts.csv": ["date", "bank", "balance"],
+                "debt.csv": ["due_date", "card", "amount", "interest"],
+                "goals.csv": ["Category", "goalamount", "DueDate"],
+                "purchases.csv": ["date", "card", "type", "amount"],
+                "income.csv": ["date", "from", "amount"]
+            }
+
+            for filename, headers in starter_files.items():
+                filepath = os.path.join(user_dir, filename)
+                with open(filepath, mode="w", newline='') as file:
+                    writer = csv.writer(file)
+                    writer.writerow(headers)
+
+        except Exception as e:
+            QMessageBox.warning(self, "Error", f"Failed to create user files: {e}")
+            return
+
+        # Log and launch dashboard
+        logthis("login.log")
+        self.dashboard_window = MainDashBoard()
+        self.dashboard_window.logged_in(userid)
+        self.dashboard_window.show()
+        self.close()
+
     def createfiles(self, username):
         # Define the path for user data
         base_path = os.path.join("data", "users", username)
