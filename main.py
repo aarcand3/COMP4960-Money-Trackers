@@ -161,13 +161,36 @@ def summarize_debt(debts):
             return total_debt
 
 # function Save or update a savings goal for a specific user.
+import os
+import pandas as pd
+from datetime import datetime
+
 def saveCategoryGoal(userid, category, amount, due_date):
     try:
+        # Validate amount
+        try:
+            amount = float(amount)
+        except (ValueError, TypeError):
+            return {"error": f"Invalid goal amount: {amount}"}
+
+        # Validate date format (DD-MM-YYYY)
+        try:
+            parsed_date = datetime.strptime(due_date.strip(), "%d-%m-%Y").date()
+            due_date = parsed_date.strftime("%d-%m-%Y")  # normalize format
+        except (ValueError, TypeError):
+            return {"error": f"Invalid due date format: {due_date}"}
+
         path = f"data/{userid}/goals.csv"
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+
         if os.path.exists(path):
             df = pd.read_csv(path)
         else:
             df = pd.DataFrame(columns=["Category", "GoalAmount", "DueDate"])
+
+        # Normalize column names in case of casing issues
+        df.columns = [col.strip().lower() for col in df.columns]
+        df.rename(columns={"category": "Category", "goalamount": "GoalAmount", "duedate": "DueDate"}, inplace=True)
 
         if category in df["Category"].values:
             df.loc[df["Category"] == category, ["GoalAmount", "DueDate"]] = [amount, due_date]
@@ -177,12 +200,13 @@ def saveCategoryGoal(userid, category, amount, due_date):
 
         df.to_csv(path, index=False)
         return True
+
     except Exception as e:
         return {"error": str(e)}
 
 #Returns a list of all saved goals (category, amount, due date), progress
-def getAllGoalsWithProgress(userid):
 
+def getAllGoalsWithProgress(userid):
     accounts_path = f"data/{userid}/accounts.csv"
     goals_path = f"data/{userid}/goals.csv"
 
@@ -192,19 +216,32 @@ def getAllGoalsWithProgress(userid):
     accounts_df = pd.read_csv(accounts_path)
     goals_df = pd.read_csv(goals_path)
 
+    # Safely convert balances to numeric
     accounts_df["balance"] = pd.to_numeric(accounts_df["balance"], errors="coerce").fillna(0)
     total_balance = accounts_df["balance"].sum()
 
     enriched_goals = []
     for _, row in goals_df.iterrows():
-        category = row["category"]
-        amount = float(row["goalamount"])
-        due_date = row["duedate"]
+        category = str(row.get("category", "")).strip()
+        goalamount_raw = row.get("goalamount", "")
+        duedate_raw = row.get("duedate", "")
+
+        # Validate goalamount
+        try:
+            amount = float(goalamount_raw)
+        except (ValueError, TypeError):
+            print(f"⚠️ Skipping invalid goalamount: {goalamount_raw}")
+            continue
+
+        # Validate duedate format
+        try:
+            due_date = datetime.strptime(str(duedate_raw).strip(), "%d-%m-%Y").date()
+        except (ValueError, TypeError):
+            print(f"⚠️ Skipping invalid duedate: {duedate_raw}")
+            continue
 
         progress_percent = round((total_balance / amount) * 100, 2) if amount > 0 else 0
-
-
-        enriched_goals.append((category, amount, due_date, progress_percent))  #needed this format
+        enriched_goals.append((category, amount, str(due_date), progress_percent))
 
     return enriched_goals
 
@@ -423,22 +460,44 @@ class MainDashBoard(QMainWindow):
     def addAccount(self):
         account = self.dashboard.add_account_name.text()
         self.dashboard.expense_comboBox.addItem(account)
-    def addNewSavings (self):
+
+    def addNewSavings(self):
         filepath = f"data/{userdata[0]}/goals.csv"
-        ammount = self.dashboard.saving_ammount_edit.text()
-        category= self.dashboard.savings_category.text.strip()
-        date = self.dashboard.saving_dateEdit.text.strip()
-        os.makedirs(os.path.dirname(filepath), exist_ok=True)
-    
-        goaldata = [date, category, ammount]
-        try:        
-            with open(filepath, mode = "a", newline="") as file:
-                writer = csv.writer(file)
-                writer.writerow(goaldata)
-        except ValueError:
-            print("Invalid amount. Please enter a numeric value.")
+
+        # Get raw inputs
+        category = self.dashboard.savings_category.text().strip()
+        amount_str = self.dashboard.saving_ammount_edit.text().strip()
+        date_str= self.dashboard.saving_dateEdit.date().toString("dd-MM-yyyy")
+
+        # Validate category
+        if not category:
+            QMessageBox.warning(self, "Invalid Input", "Category cannot be empty.")
             return
-        #update table
+
+        # Validate amount
+        try:
+            amount = float(amount_str)
+        except ValueError:
+            QMessageBox.warning(self, "Invalid Input", "Goal amount must be a number.")
+            return
+
+        # Validate date format (YYYY-MM-DD)
+        try:
+            datetime.strptime(date_str, "%d-%m-%Y")
+        except ValueError:
+            QMessageBox.warning(self, "Invalid Input", "Due date must be in MM-DD-YYYY format.")
+            return
+
+        # Ensure directory exists
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+
+        # Write validated data
+        goaldata = [category, amount, date_str]
+        with open(filepath, mode="a", newline="") as file:
+            writer = csv.writer(file)
+            writer.writerow(goaldata)
+
+        # Update table
         self.load_widgets(userdata[0])
 
     def showChat (self):
