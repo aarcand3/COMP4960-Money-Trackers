@@ -2,12 +2,12 @@
 # Jack Donahue, Simon Dean, Allison Arcand, Sonia Yahi
 
 # Library imports & Initial Values
-from cProfile import label
 import csv
 import math
 import shutil
 import re
 import pandas as pd
+from cProfile import label
 from wsgiref import headers
 from PyQt5 import QtWidgets
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QPainter
@@ -27,10 +27,9 @@ userdata = ["userid","userpass","firstname","lastname"]
 usertotals = ["networth", "totalbalence", "totaldebt", "totalincome"]
 categorytotals = ["Housing", "Food", "Transport", "Personal Care", "Savings", "Debt Repay", "Other"]
 
-# Functions
+# Updates the users data in both the program var & the CSV
 def importUser(userid):
     global usertotals
-# Updates the users data in both the program var & the CSV
     totaldebt = 0
     totalincome = 0
     totalbalence = 0
@@ -77,7 +76,6 @@ def getBudget():
     importUser(userdata[0])
     income = usertotals[3]
     networth = usertotals[0]
-
     budget = {
         "Income": round(income),
         "Housing": round(preferredTotals[0], 2),
@@ -89,12 +87,11 @@ def getBudget():
         "Discretionary": round(preferredTotals[6], 2),
         "Net Total":round(preferredTotals[7],2)
     }
-
     return budget
 
 
+# Expandable loggging function
 def logthis(logname):
-    # 
     if logname == "login.log":
         #Gets Current Time and Converts to String
         now = datetime.now()
@@ -121,10 +118,8 @@ def logthis(logname):
             index=False,
             header=not pd.io.common.file_exists("logs/"+logname)
         )
-
-    elif False:
-        # Put new logging code here!
-        pass
+    elif False: # change to if loggname == X
+        pass# Put code for new logs here 
         
     else:
         print("ERROR! Could not find: "+logname+" is it configured?")
@@ -152,9 +147,8 @@ def load_debt_data(username):
         print(f"⚠️ Error loading debt data for {username}: {e}")
 
     return debts
-#Calculates total debt
-#sort the list by interest rate   
 
+#Calculates total debt & sorts the list by interest rate   
 def summarize_debt(debts):
             total_debt = sum(d['balance'] for d in debts)
             for d in debts:
@@ -163,7 +157,6 @@ def summarize_debt(debts):
             return total_debt
 
 # function Save or update a savings goal for a specific user.
-
 def saveCategoryGoal(userid, category, amount, due_date):
     try:
         # Validate amount
@@ -218,7 +211,6 @@ def saveCategoryGoal(userid, category, amount, due_date):
         return {"error": str(e)}
 
 #Returns a list of all saved goals (category, amount, due date), progress
-
 def getAllGoalsWithProgress(userid):
     accounts_path = f"data/{userid}/accounts.csv"
     goals_path = f"data/{userid}/goals.csv"
@@ -281,6 +273,7 @@ def getTotalSavingsProgress(userid):
     total_progress = round((total_balance / total_goal_amount) * 100, 2)
     return total_progress
 
+# Creates new user account and ensure the requremnts are met
 def create_new_user_account(userid, firstname, lastname, password, confirm_password):
     # Basic validation
     if not all([userid, firstname, lastname, password, confirm_password]):
@@ -311,7 +304,7 @@ def create_new_user_account(userid, firstname, lastname, password, confirm_passw
         return {"success": f"Account created for {userid}."}
     except Exception as e:
         return {"error": str(e)}
-#
+
 # login window and validation
 class LoginWindow (QMainWindow):
     def __init__(self):
@@ -321,7 +314,6 @@ class LoginWindow (QMainWindow):
 
         self.ui.login_button.clicked.connect(self.check_login)
         self.ui.createaccount_button.clicked.connect(self.create_user)
-
 
     def create_user(self):
         # Collect input 
@@ -414,7 +406,7 @@ class LoginWindow (QMainWindow):
     def check_login(self):
         userdata[0] = self.ui.user_box.text()
         userdata[1] = self.ui.pw_box.text()
-    ##validation
+    #validation
         with open("data/userlist.csv", mode="r") as data:
             csv_reader = csv.reader(data)
             for row in csv_reader:
@@ -463,6 +455,7 @@ class ChatBox(QDialog) :
         self.chatBox.chatWindow.verticalScrollBar().setValue(
                 self.chatBox.chatWindow.verticalScrollBar().maximum())
 
+# Class structure for GUI
 class WarningBox(QDialog):
     def __init__(self, message):
         super().__init__()

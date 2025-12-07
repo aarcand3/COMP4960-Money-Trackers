@@ -1,16 +1,16 @@
 # COMP4960-Money-Trackers
 The official repository for the expense tracking project for Software Engineering group project.
 
-Today’s financial world is increasingly challenging in the consumer driven market. The average American cannot cover a surprise five hundred dollar expense. People are painfully unaware of their personal financial health leaving them in crushing debt from student loans to credit cards.
-Our solution would be to develop an user-friendly expense tracker to assist people with seeing what payments would need to be made and to help users create and stick to a budget they create with our resources. In creating a budget the budget tracker will help assist in choosing which debt they want to pay off first or how much they can contribute to their savings based on the goals that they choose. 
-Our GUI will be able to take in a csv file or personal input and categorize to assist in visualising spending and help to create a budget and debt pay off plan. 
+Today’s financial world is increasingly challenging in the consumer driven market. The average American cannot cover a surprise five hundred dollar expense. 
+People are painfully unaware of their personal financial health leaving them in crushing debt from student loans to credit cards.
+To help solve this problem me have developed a simple expense tracker to assist people in saving, paying down debt, and budget. 
+Our tracker can help assist in choosing which sourse of debt to pay off first based on interest rate, plan savings goals, and more. 
+Our GUI is able to take in a CSV file directly or allow structured manual input of data as well as visualise spending with charts. 
 
-Test User - John Doe
-userID: jdoe
-Password: password
+Test User (John Doe)
+    username: jdoe
+    password: password
+You may also create your own user in the program
 
-Several Third Party Libraries need to be installed prior to using the tracker. Please see requirements.txt for more information.
-
-To start create an account with your desired credentials 
-
-IMPORTANT: Please note that the imbeded chatbot does not provide finacial advice.
+Several Third Party Libraries need to be installed prior to using the tracker. Please see requirements.txt for more information & installation.
+IMPORTANT: Please note that the imbeded AI chatbot does not provide finacial advice and to NEVER share personal information.
