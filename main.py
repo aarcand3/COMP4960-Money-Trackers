@@ -65,14 +65,15 @@ def importUser(userid):
     usertotals[0] = totalbalence - totaldebt
 
 def getBudget():
-    preferredTotals = ["housing", "Food", "Transport", "Personal Care", "Savings", "Debt minimums", "Other"]
+    preferredTotals = ["housing", "Food", "Transport", "Personal Care", "Savings", "Debt minimums", "Other", "Net"]
     preferredTotals[0] = usertotals[3]*0.3 #housing
-    preferredTotals[1] = 400  #food
+    preferredTotals[1] = 300  #food
     preferredTotals[2] = usertotals[3]*.2 #transportation
-    preferredTotals[3] = 200  # personal care
+    preferredTotals[3] = 100  # personal care
     preferredTotals[4] = usertotals[3] * 0.1 #savings
     preferredTotals[5] = usertotals[2] *0.08 # debt repayment
     preferredTotals[6] = usertotals[3]*0.2 #other
+    preferredTotals[7] = usertotals[3] - sum(preferredTotals[0:7])
     importUser(userdata[0])
     income = usertotals[3]
     networth = usertotals[0]
@@ -85,7 +86,8 @@ def getBudget():
         "Personal Care": round(preferredTotals[3], 2),
         "Savings": round(preferredTotals[4], 2),
         "Debt Repayment": round(preferredTotals[5], 2),
-        "Discretionary": round(preferredTotals[6], 2)
+        "Discretionary": round(preferredTotals[6], 2),
+        "Net Total":round(preferredTotals[7],2)
     }
 
     return budget
@@ -595,7 +597,6 @@ class MainDashBoard(QMainWindow):
             budget_model = getBudget()
             table = QStandardItemModel()
             table.setColumnCount(2)
-            table.setRowCount(len(budget_model))
             table.setHorizontalHeaderLabels(["Category", "Amount"])
 
             for category, amount in budget_model.items():
