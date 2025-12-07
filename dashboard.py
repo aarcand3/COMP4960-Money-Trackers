@@ -92,6 +92,14 @@ class Ui_MainWindow(object):
         self.category_comboBox = QtWidgets.QComboBox(self.centralwidget)
         self.category_comboBox.setGeometry(QtCore.QRect(30, 240, 130, 28))
         self.category_comboBox.setObjectName("category_comboBox")
+        self.category_comboBox.addItem("")
+        self.category_comboBox.addItem("")
+        self.category_comboBox.addItem("")
+        self.category_comboBox.addItem("")
+        self.category_comboBox.addItem("")
+        self.category_comboBox.addItem("")
+        self.category_comboBox.addItem("")
+        self.category_comboBox.addItem("")
         self.expense_dateEdit = QtWidgets.QDateEdit(self.centralwidget)
         self.expense_dateEdit.setGeometry(QtCore.QRect(380, 240, 110, 29))
         self.expense_dateEdit.setObjectName("expense_dateEdit")
@@ -154,6 +162,7 @@ class Ui_MainWindow(object):
         self.tableLabel = QtWidgets.QLabel(self.centralwidget)
         self.tableLabel.setGeometry(30,300,471,20)
         self.tableLabel.setObjectName("tableLabel")
+
         self.expense_group = {self.ammount_edit, self.ammount_label, self.account_label, self.date_label, self.expense_dateEdit, self.add_expense_button, self.category_comboBox, self.type_label, self.expense_comboBox}
         self.savings_group = {self.saving_ammount_edit, self.savings_label, self.saving_date_label, self.saving_dateEdit, self.add_saving_button, self.save_category_label, self.savings_category}
         self.add_account_group = {self.account_label, self.add_account_name, self.add_account_button}

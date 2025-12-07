@@ -322,27 +322,23 @@ class LoginWindow (QMainWindow):
 
 
     def create_user(self):
-        # Collect input from GUI
+        # Collect input 
         userid = self.ui.usernameEdit.text().strip()
         firstname = self.ui.firstnameEdit.text().strip()
         lastname = self.ui.lastnameEdit.text().strip()
         password = self.ui.passwordEdit.text().strip()
         confirm = self.ui.confirmEdit.text().strip()
-
-        # Validate input
+        # Validate
         if not all([userid, firstname, lastname, password, confirm]):
             QMessageBox.warning(self, "Invalid", "All fields are required.")
             return
-
         if password != confirm:
             QMessageBox.warning(self, "Invalid", "Passwords do not match.")
             return
-
         if len(password) < 6:
             QMessageBox.warning(self, "Invalid", "Password must be at least 6 characters.")
             return
-
-        # Check for existing user in userlist.csv
+        # Check for existing user
         try:
             with open("data/userlist.csv", mode="r") as data:
                 csv_reader = csv.reader(data)
@@ -353,22 +349,20 @@ class LoginWindow (QMainWindow):
                         QMessageBox.warning(self, "Cannot Create User", "User already exists.")
                         return
         except FileNotFoundError:
-            pass  # userlist.csv doesn't exist yet — will be created below
-
-        # Save new user to userlist.csv
+            pass  
+        # Save new user
         try:
             with open("data/userlist.csv", mode="a", newline='') as file:
                 writer = csv.writer(file)
                 writer.writerow([userid, password, firstname, lastname])
+                userdata = [userid,password,firstname,lastname]
         except Exception as e:
             QMessageBox.warning(self, "Error", f"Failed to write userlist: {e}")
             return
-
         # Create user folder and starter files
         try:
             user_dir = f"data/{userid}"
             os.makedirs(user_dir, exist_ok=True)
-
             starter_files = {
                 "accounts.csv": ["date", "bank", "balance"],
                 "debt.csv": ["due_date", "card", "amount", "interest"],
@@ -376,7 +370,6 @@ class LoginWindow (QMainWindow):
                 "purchases.csv": ["date", "card", "type", "amount"],
                 "income.csv": ["date", "from", "amount"]
             }
-
             for filename, headers in starter_files.items():
                 filepath = os.path.join(user_dir, filename)
                 with open(filepath, mode="w", newline='') as file:
@@ -386,7 +379,6 @@ class LoginWindow (QMainWindow):
         except Exception as e:
             QMessageBox.warning(self, "Error", f"Failed to create user files: {e}")
             return
-
         # Log and launch dashboard
         logthis("login.log")
         self.dashboard_window = MainDashBoard()
@@ -511,7 +503,6 @@ class MainDashBoard(QMainWindow):
         self.dashboard.add_account_button.clicked.connect(self.addAccount)
         self.dashboard.add_saving_button.clicked.connect(self.addNewSavings)
         self.dashboard.budget_button.clicked.connect(self.showBudget)
-
         self.setStyleSheet(f"""
         QWidget {{
             background-color:  #D8E4DC;  /* Light sage green */;
@@ -592,16 +583,22 @@ class MainDashBoard(QMainWindow):
         self.WarningBox = WarningBox("Warning. This Application is not responsible for any financial advice given. Please consult a professional for serious matters. By clicking ok you acknowledge responsibility for your own actions.")
         self.WarningBox.showWarning()
     def showBudget(self):
-        self.dashboard.tableLabel.setText("This is a sample budget to be used for educational purposes only. ")
-        self.dashboard.budget_button.setText("Debt Table")
-      #  self.dashboard.goals_tableView.setParent(None)
-        budget_model = getBudget()
-        table = QStandardItemModel()
-        table.setColumnCount(2)
-        table.setRowCount(len(budget_model))
-        table.setHorizontalHeaderLabels(["Category", "Amount"])
+        if not hasattr(self, "showingBudget"):
+            self.showingBudget = True
 
-        for category, amount in budget_model.items():
+        if self.showingBudget:
+        
+
+            self.dashboard.tableLabel.setText("This is a sample budget to be used for educational purposes only. ")
+            self.dashboard.budget_button.setText("Debt Table")
+
+            budget_model = getBudget()
+            table = QStandardItemModel()
+            table.setColumnCount(2)
+            table.setRowCount(len(budget_model))
+            table.setHorizontalHeaderLabels(["Category", "Amount"])
+
+            for category, amount in budget_model.items():
                 if not None:
                     row = [
                     QStandardItem(str(category)),
@@ -610,7 +607,13 @@ class MainDashBoard(QMainWindow):
                     table.appendRow(row)
                 else:
                     pass
-        self.dashboard.debt_tableView.setModel(table)
+            self.dashboard.debt_tableView.setModel(table)
+        else:
+            self.dashboard.tableLabel.setText("This your current debt.")
+            self.dashboard.budget_button.setText("Show Budget Table")
+            self.load_widgets(userdata[0])
+        self.showingBudget = not self.showingBudget
+
 
     def populate_accounts_from_purchases(self, combo_box, userid):
         combo_box.clear()
