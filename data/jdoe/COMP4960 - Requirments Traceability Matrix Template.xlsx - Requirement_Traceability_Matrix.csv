@@ -1,0 +1,29 @@
+REQUIREMENTS TRACEABILITY MATRIX,,,,,,,,,,,,,
+Project Name,Expense Tracker,,,,,,,,,,,,
+Project Type,Software,,,,,,,,,,,,
+Project Start Date,9/29/2025,,,,,,,,,,,,
+Project End Date,12/5/2025,,,,,,,,,,,,
+Project Sponsor,,,,,,,,,,,,,
+Primary Driver,Allison Arcand,,,,,,,,,,,,
+Secondary Driver,,,,,,,,,,,,,
+Division,Software Engineering,,,,,,,,,,,,
+Project Manager/Department,,,,,,,,,,,,,
+ID,"Assoc
+ID","Technical Assumption(s)
+and/or Customer Need(s)","Functional
+Requirement",Status,"Architectural/Design
+Document","Technical
+Specification","System
+Component(s)","Software
+Module(s)","Test Case
+Number",Tested In,Implemented In,Verification,"Additional
+Comments"
+001,1.1.1,A place to put all csv files to easily visualize,Provide a GUI to intake a csv file and categorize expenses,Testing,"1.2. , 3.2.1 component map",Takes only csv files and reformats to all read similarly,"PyQt Ui, csv component",N/A,N/A,N/A,N/A,N/A,N/A
+002,2.2.2,A place to put in accounts of all kinds,input accounts for debts savings and income,Completed,"v 1.2,  3.2.2 component map ",Inputs detailed data and logs to the correct file,input logic layer,N/A,N/A,N/A,N/A,N/A,N/A
+003,3.3.3,A place to input individual expenses,input current expenses outside of a csv file,Completed,"v1.2 ,  3.2.2 component mapping , 3.2.1",Logs data to purchase file correctly,input logic layer,N/A,N/A,N/A,N/A,N/A,N/A
+004,4.4.4,A way to track debt payoff progress,tracker to show progress on paid debt,Completed,"v1.2 , 4.1.2 main window ui ",Takes all debt and shows progress on how much has been paid off,"PyQt ui visuals, front end ",N/A,N/A,N/A,N/A,N/A,N/A
+005,5.5.5,A visually appealing way so see user data ,show graphs and tables to show data in easily digestible way,Completed,"v1.2 , 4.1.2 Ui diagram, 3.2.2 component map",Creates a pie graph verifying how much comes from each source ,"PyQt ui compenents, front end",N/A,N/A,N/A,N/A,N/A,N/A
+006,6.6.6,Need a secure system to protect data ,keep data secure ,Testing,"v 1.2 , 3.2.2 component mapping",requires matching passwords ensures no duplicate accounts ,"authentication layer, database",N/A,N/A,N/A,N/A,N/A,N/A
+007,7.7.7,Ability to create a new secure account,Produce a chatbot to give uncertified financial adive,Completed,"v 1.2,  3.2.2 component map, 3.1 overall architecture, 3.3.3 technology stack ",apply ollama opensource code in the form of our own chatbot run on a local server,"chatbot layer , ui layer, ollama ",N/A,N/A,N/A,N/A,N/A,N/A
+008,8.8.8,,provide a log of all successful logins of each user,Completed,"v 1.2 , 4.3.2 logical diagram,4.2 class diagram",logging logic intakes info and automatically logs data when login is successful,"logging logic, database",N/A,N/A,N/A,N/A,N/A,N/A
+009,9.9.9,need a budget to follow,Give suggested budget recommendation,Testing,"v1.2 ,  3.1 overall architecture",Takes income and based on general recommendations will create an ideal budget to stay within that income,"recommendation layer, ui layer",N/A,N/A,N/A,N/A,N/A,N/A

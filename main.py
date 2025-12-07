@@ -547,6 +547,7 @@ class MainDashBoard(QMainWindow):
     def addAccount(self):
         account = self.dashboard.add_account_name.text()
         self.dashboard.expense_comboBox.addItem(account)
+        self.dashboard.add_account_name.clear()
 
     def addNewSavings(self):
         filepath = f"data/{userdata[0]}/goals.csv"
@@ -659,12 +660,9 @@ class MainDashBoard(QMainWindow):
         elif index == 3:
             for widget in self.dashboard.expense_group:
                 widget.show()
-
         elif index == 4:
             for widget in self.dashboard.savings_group:
-                widget.show()    # need to replace for whatever we choose to add a savings goal?
-        self.dashboard.expense_comboBox.currentIndexChanged.connect(self.on_dropdown_change)
-
+                widget.show()  
     def addExpense(self):
     # Manually input expenses to purchaces.csv
         filepath = f"data/{userdata[0]}/purchases.csv"
@@ -688,9 +686,9 @@ class MainDashBoard(QMainWindow):
         self.load_widgets(userdata[0])
     
 
-    def eventFilter(self, obj, event): #accept csv files only 
+    def eventFilter(self, obj, event):
         if obj == self.dashboard.frame:
-            if event.type() == QEvent.DragEnter: #need qevent to accept drops
+            if event.type() == QEvent.DragEnter:
                 if event.mimeData().hasUrls():
                     for url in event.mimeData().urls():
                         if url.toLocalFile().lower().endswith(".csv"):
@@ -699,22 +697,36 @@ class MainDashBoard(QMainWindow):
                 event.ignore()
                 return True
 
+            elif event.type() == QEvent.DragMove:
+                if event.mimeData().hasUrls():
+                    event.acceptProposedAction()
+                    return True
+
             elif event.type() == QEvent.Drop:
                 for url in event.mimeData().urls():
                     filePath = url.toLocalFile()
-                    if filePath.lower().endswith(".csv"):   # add to user folder 
+                    if filePath.lower().endswith(".csv"):
                         userFolder = os.path.join("data", userdata[0])
                         os.makedirs(userFolder, exist_ok=True)
-                        desinationPath = os.path.join(userFolder, os.path.basename(filePath))
-                        shutil.copy(filePath, desinationPath)
-                        self.dashboard.label.setText("CSV file accepted: " + filePath)
+                        destinationPath = os.path.join(userFolder, os.path.basename(filePath))
+                        shutil.copy(filePath, destinationPath)
+                        self.dashboard.label.setText(f"CSV file accepted: {filePath}")
+                        self.load_widgets(userdata[0])
                         event.acceptProposedAction()
                     else:
                         print("Rejected non‑CSV file:", filePath)
                         event.ignore()
                 return True
-        return super().eventFilter(obj, event)
+            return super().eventFilter(obj, event)
 
+    def load_csv(self, filepath):
+        try:
+            with open(filepath, newline="") as file:
+                reader = csv.reader(file)
+                for row in reader:
+                    print(row)  # Replace with logic to update your UI
+        except Exception as e:
+            print(f"Error reading CSV: {e}")
             
 #imports a csv from an application (Excel for now)
     def import_csv_from_app(self, userid, target_name, file_path):
