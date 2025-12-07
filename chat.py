@@ -3,7 +3,16 @@ def startChat(userMessage):
     URL = 'http://jld.ddns.net:11434/api/chat'
     model = 'gemma3:12b'
     messages = []
-
+ 
+    # Check if server is up & reachablez
+    try:
+        response_check = requests.get(URL)
+        if response_check.status_code != 200:
+            return f"Error: Unable to reach the API, status code: {response_check.status_code}"
+    except requests.exceptions.RequestException as e:
+        return f"Error: The AI server apears to be offline\nContact donahuej5@wit.edu"
+        
+        
     while True:
         user_input = userMessage
         message = {
@@ -18,7 +27,7 @@ def startChat(userMessage):
             "think": False,
             "options": {},
             "stream": False,
-            "keep_alive":"5m",
+            "keep_alive":"3m",
         }
 
         headers = {

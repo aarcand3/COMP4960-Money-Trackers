@@ -7,8 +7,8 @@ import csv
 import math
 import shutil
 import re
-from wsgiref import headers
 import pandas as pd
+from wsgiref import headers
 from PyQt5 import QtWidgets
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QPainter
 from PyQt5.QtChart import QChart, QChartView, QPieSeries ##If not loading for team pip install PyQtChart
@@ -433,17 +433,18 @@ class LoginWindow (QMainWindow):
                     self.close()
                     return
             QMessageBox.warning(self, "Login Failed", "Invalid username or password.")
+            
 class ChatBox(QDialog) :
     def __init__(self):
         super().__init__()
         self.chatBox = Ui_Chat()
         self.chatBox.setupUi(self)  
-        self.response = []
-        welcomeMessage =  ("Welcome to chat")
+        self.response = []    
+        welcomeMessage = "Welcome to the Chat!\nModel: Gemma3:12b"    
         self.updateChat(welcomeMessage)
         self.chatBox.sendButton.clicked.connect(self.sendChat)
         self.chatBox.lineEdit.setPlaceholderText("Type your message here...")
-
+        
 
     def sendChat(self):
         text = self.chatBox.lineEdit.text().strip() # get text to send 

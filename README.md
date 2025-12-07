@@ -12,3 +12,5 @@ Password: password
 Several Third Party Libraries need to be installed prior to using the tracker. Please see requirements.txt for more information.
 
 To start create an account with your desired credentials 
+
+IMPORTANT: Please note that the imbeded chatbot does not provide finacial advice.

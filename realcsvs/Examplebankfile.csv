@@ -1,8 +1,0 @@
-"Transaction Type","Date","Account Type","Description","Amount","Reference No.","Credits","Debits"
-DEBIT,10/2/25,Checking,"TOYOTA ACH RTL",-150.00," ",,$1.00
-CHECK,10/1/25,Checking,"",-1400.00,107,,$1400.00
-DIRECT DEBIT,9/30/25,Checking,"APPLE.COM/BILL    866-712-7753 CA            1618",-1.99," ",,$1.99
-DIRECT DEPOSIT,9/30/25,Checking,"VENMO            CASHOUT",1.00," ",$1.00,
-DEBIT,9/29/25,Checking,"DISCOVER         E-PAYMENT",-100.00," ",,$100.00
-POS DEBIT,9/29/25,Checking,"BEST BUY          DORCHESTER   MA            1618",-1.00," ",,$1.00
-DIRECT DEBIT,9/29/25,Checking,"PAPERSOURCE -1    SOMERVILLE   MA            1618",-1.00," ",,$1.00
